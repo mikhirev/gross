@@ -1,12 +1,12 @@
-.TH grossd 8 "2008-05-04" "" ""
+.TH grossd 5 "2008-05-04" "" ""
 .if n .ad l
 .nh
 .SH "NAME"
 \fBgrossd.conf\fP \- Greylisting of Suspicious Sources daemon configuration file
 .SH "SYNOPSIS"
-\fI@sysconfdir@/etc/grossd.conf\fP
+\fI@sysconfdir@/grossd.conf\fP
 .SH "DESCRIPTION"
-\fIgrossd\fP\|(8) reads configuration data from \fI@sysconfdir@/etc/grossd.conf\fP
+\fIgrossd\fP\|(8) reads configuration data from \fI@sysconfdir@/grossd.conf\fP
 (or the file specified with \fB\-f\fP on the command line). 
 An example configuration file is installed by default.  You have to
 set some configuration options in order to get \fIgrossd\fP\|(8) running in 
@@ -81,7 +81,7 @@ replication.
 is the full path of the file \fIgrossd\fP\|(8) writes its pid into.
 You can set parameter `check', if you want to keep \fIgrossd\fP\|(8) from
 starting should pidfile already exist.
-.Sh "Query constraints"
+.SH "Query constraints"
 .IP "\fBgrey_delay\fP" 4
 is the time in seconds new triplets are kept on the greylist.  Default is 180.
 .IP "\fBquery_timelimit\fP" 4
@@ -294,7 +294,7 @@ sendmail.mc and configure \fBmilter_listen\fP accordingly:
 You can check if your version of Sendmail has Milter support compiled in
 by issuing the following command:
 .PP
-  sendmail -bt -d0.1
+  sendmail \-bt \-d0.1
 .SH "SEE ALSO"
 \fIgrossd\fP\|(8)
 .PP

@@ -72,6 +72,8 @@ is the mask for \fIgrossd\fP\|(8) to use when matching the
 to treat addresses like \fIa.b.c.d\fP as \fIa.b.c.0\fP.
 Setting \fBgrey_mask\fP to 32 makes \fIgrossd\fP\|(8) to require that consecutive
 attempts are made from the same `smtp\-client\-ip'.
+.IP "\fBgrey_mask6\fP" 4
+is the same as \fBgrey_mask\fP but for IPv6 addresses. Default is 64.
 .IP "\fBstatefile\fP" 4
 is the full path of the file that the server uses to store
 the state information.  Default is not to have a statefile.  You may

@@ -231,6 +231,11 @@ configure_grossd(configlist_t *config)
 	if (errno || ctx->config.grey_mask > 32 || ctx->config.grey_mask < 0)
 		daemon_shutdown(EXIT_CONFIG, "Invalid grey_mask: %s", CONF("grey_mask"));
 
+	errno = 0;
+	ctx->config.grey_mask6 = strtol(CONF("grey_mask6"), (char **)NULL, 10);
+	if (errno || ctx->config.grey_mask6 > 128 || ctx->config.grey_mask < 0)
+		daemon_shutdown(EXIT_CONFIG, "Invalid grey_mask6: %s", CONF("grey_mask6"));
+
 	ctx->config.status_host.sin_family = AF_INET;
 	host = gethostbyname(CONF("status_host") ? CONF("status_host") : CONF("host"));
 	if (NULL == host)

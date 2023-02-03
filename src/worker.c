@@ -20,6 +20,7 @@
 
 #include "common.h"
 #include "srvutils.h"
+#include "addrutils.h"
 #include "syncmgr.h"
 
 #ifdef DNSBL
@@ -37,7 +38,6 @@ void milter_server_init();
 
 /* internals */
 void update_counters(int status);
-char *grey_mask(char *ipstr);
 
 /*
  * destructor for client_info_t
@@ -112,51 +112,6 @@ request_reference(grey_tuple_t *request)
 }
 
 
-char *
-grey_mask(char *ipstr)
-{
-	int ret;
-	unsigned int ip, net, mask;
-	const char *ptr = NULL;
-	char masked[INET_ADDRSTRLEN] = { '\0' };
-	struct in_addr inaddr;
-
-	/*
-	 * apply checkmask to the ip 
-	 */
-	if (strlen(ipstr) > INET_ADDRSTRLEN) {
-		logstr(GLOG_NOTICE, "invalid ipaddress: %s", ipstr);
-		return NULL;
-	}
-
-	ret = inet_pton(AF_INET, ipstr, &inaddr);
-	switch (ret) {
-	case -1:
-		logstr(GLOG_ERROR, "test_tuple: inet_pton: %s", strerror(errno));
-		return NULL;
-		break;
-	case 0:
-		logstr(GLOG_ERROR, "not a valid ip address: %s", ipstr);
-		return NULL;
-		break;
-	}
-
-	/* case default */
-	ip = inaddr.s_addr;
-
-	/* this is 0xffffffff ^ (2 ** (32 - mask - 1) - 1) */
-	mask = 0xffffffff ^ ((1 << (32 - ctx->config.grey_mask)) - 1);
-
-	/* ip is in network order */
-	net = ip & htonl(mask);
-
-	ptr = inet_ntop(AF_INET, &net, masked, INET_ADDRSTRLEN);
-	if (!ptr) {
-		logstr(GLOG_ERROR, "test_tuple: inet_ntop: %s", strerror(errno));
-		return NULL;
-	}
-	return strdup(masked);
-}
 
 void
 update_counters(int status)

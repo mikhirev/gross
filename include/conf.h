@@ -40,6 +40,7 @@
 			"stat_type",		"delay",	\
 			"stat_type",		"status",	\
 			"grey_mask",		"24",		\
+			"grey_mask6",		"64",		\
 			"grey_delay",		"10",           \
 			"grey_tuple",		"user",		\
 			"syslog_facility",	"mail",		\
@@ -80,6 +81,7 @@
                         "log_method",			\
                         "log_level",			\
 			"grey_mask",			\
+			"grey_mask6",			\
                         "grey_delay",               	\
                         "grey_tuple",               	\
 			"check",			\

@@ -198,6 +198,7 @@ typedef struct
 	int flags;
 	int checks;
 	int grey_mask;
+	int grey_mask6;
 	int protocols;
 	int greylist_delay;
 	postfix_config_t postfix;

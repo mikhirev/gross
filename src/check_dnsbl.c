@@ -27,6 +27,7 @@
 #include "check_dnsbl.h"
 #include "srvutils.h"
 #include "utils.h"
+#include "addrutils.h"
 #include "worker.h"
 
 /* the cleanup routine */
@@ -144,65 +145,6 @@ addrinfo_callback(void *arg, int status, struct hostent *host)
 }
 
 
-/*
- * reverse_inet_addr	- reverse ipaddress string for dnsbl query
- *                        e.g. 1.2.3.4 -> 4.3.2.1
- */
-int
-reverse_inet_addr(char *ipstr)
-{
-	unsigned int ipa, tmp;
-	int i;
-	int ret;
-	struct in_addr inaddr;
-	const char *ptr;
-	char tmpstr[INET_ADDRSTRLEN];
-	size_t iplen;
-
-	if ((iplen = strlen(ipstr)) > INET_ADDRSTRLEN) {
-		fprintf(stderr, "invalid ipaddress: %s\n", ipstr);
-		return -1;
-	}
-	ret = inet_pton(AF_INET, ipstr, &inaddr);
-	switch (ret) {
-	case -1:
-		gerror("reverse_inet_addr: inet_pton");
-		return -1;
-		break;
-	case 0:
-		logstr(GLOG_ERROR, "not a valid ip address: %s", ipstr);
-		return -1;
-		break;
-	}
-
-	/* case default */
-	ipa = inaddr.s_addr;
-
-	tmp = 0;
-
-	for (i = 0; i < 4; i++) {
-		tmp = tmp << 8;
-		tmp |= ipa & 0xff;
-		ipa = ipa >> 8;
-	}
-
-	/*
-	 * this tmpstr hack here is because at least FreeBSD seems to handle
-	 * buffer lengths differently from Linux and Solaris. Specifically,
-	 * with inet_ntop(AF_INET, &tmp, ipstr, iplen) one gets a truncated
-	 * address in ipstr in FreeBSD.
-	 */
-	ptr = inet_ntop(AF_INET, &tmp, tmpstr, INET_ADDRSTRLEN);
-	if (!ptr) {
-		gerror("inet_ntop");
-		return -1;
-	}
-	assert(strlen(tmpstr) == iplen);
-	strncpy(ipstr, tmpstr, iplen);
-
-	return 0;
-}
-
 int
 dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 {
@@ -215,7 +157,7 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	struct timespec ts, start, now, timeleft;
 	char buffer[MAXQUERYSTRLEN];
 	char *query;
-	char *qstr;
+	char qstr[REVERSED_INET6_ADDRSTRLEN];
 	char *sender;
 	char *ptr;
 	const char *orig_qstr;
@@ -258,16 +200,14 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 		/* test the client ip address */
 		assert(request->client_address);
 		orig_qstr = request->client_address;
-		qstr = strdup(request->client_address);
-
-		if (strlen(qstr) > INET_ADDRSTRLEN - 1) {
-			logstr(GLOG_ERROR, "invalid ipaddress: %s", qstr);
-			Free(qstr);
+		if (strlen(orig_qstr) >= INET6_ADDRSTRLEN) {
+			logstr(GLOG_ERROR, "invalid ipaddress: %s", orig_qstr);
 			goto FINISH;
 		}
+
+		strncpy(qstr, request->client_address, INET6_ADDRSTRLEN);
 		ret = reverse_inet_addr(qstr);
 		if (ret < 0) {
-			Free(qstr);
 			goto FINISH;
 		}
 	} else if (check_info->type == TYPE_RHSBL) {
@@ -282,7 +222,7 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 		if (ptr > sender) {
 			/* found */
 			/* skip '@' */
-			orig_qstr = qstr = strdup(ptr + 1);
+			orig_qstr = strncpy(qstr, ptr + 1, INET6_ADDRSTRLEN);
 			Free(sender);
 		} else {
 			/* no sender domain, no check */
@@ -364,8 +304,6 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 		if (edict->obsolete || done || nfds == 0)
 			break;
 	}
-
-	Free(qstr);
 
 	ares_cancel(*channel);
       FINISH:

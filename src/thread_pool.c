@@ -340,7 +340,7 @@ send_result(edict_t *edict, void *result)
 
 	message.result = result;
 
-	ret = put_msg(edict->resultmq, &message, sizeof(message), 0);
+	ret = put_msg(edict->resultmq, &message, sizeof(result), 0);
 	if (ret < 0)
 		gerror("send_result");
 }

@@ -205,7 +205,7 @@ dnsbl_stats(char *buf, int32_t size)
 	cur = ctx->stats.dnsbl_match;
 
 	while (cur) {
-		count = snprintf(tick, size, "%llu", cur->matches_startup);
+		count = snprintf(tick, size, "%" PRIu64, cur->matches_startup);
 		tick += count;
 		size = size - count;
 		if (cur->next) {

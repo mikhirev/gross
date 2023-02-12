@@ -94,7 +94,7 @@ get_srvstatus(char *buf, int len)
 		    state, update_len, update_len_in, update_len_out);
 		ACTIVATE_STATS_GUARD();
 		snprintf(buf + strlen(buf), len - strlen(buf),
-		    " Trust: %llu Match: %llu Greylist: %llu Block: %llu Queries/sec: %lf",
+		    " Trust: %" PRIu64 " Match: %" PRIu64 " Greylist: %" PRIu64 " Block: %" PRIu64 " Queries/sec: %lf",
 		    ctx->stats.all_trust, ctx->stats.all_match, ctx->stats.all_greylist,
 		    ctx->stats.all_block,
 		    (double)(ctx->stats.all_trust + ctx->stats.all_match + ctx->stats.all_greylist +

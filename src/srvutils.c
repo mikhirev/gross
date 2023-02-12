@@ -161,7 +161,7 @@ new_address(void *val1, size_t val2)
 int
 walk_mmap_info(void)
 {
-	int i;
+	unsigned int i;
 	size_t offset = (((size_t) & (ctx->mmap_info->brq[1])) - ((size_t) ctx->mmap_info->brq->group));
 
 	logstr(GLOG_DEBUG, "fixing bloom ring queue memory pointers, offset=%x", offset);
@@ -186,8 +186,8 @@ void
 create_statefile(void)
 {
 	int ret;
-	int lumpsize;
-	int i;
+	size_t lumpsize;
+	size_t i;
 	struct stat statbuf;
 	FILE *statefile;
 	unsigned int num = ctx->config.num_bufs;
@@ -225,8 +225,9 @@ build_bloom_ring(unsigned int num, bitindex_t num_bits)
 {
 	bloom_ring_queue_t *brq;
 	char *ptr;
-	int i, ret;
-	int lumpsize;
+	unsigned int i;
+	int ret;
+	size_t lumpsize;
 	struct stat statbuf;
 	char *magic = "mmbrq2\n";
 	int use_mmap = FALSE;
@@ -259,10 +260,10 @@ build_bloom_ring(unsigned int num, bitindex_t num_bits)
 		if (ret < 0) {
 			/* statefile does not exist or is not accessible */
 			daemon_fatal("stat(): statefile opening failed");
-		} else if (statbuf.st_size != lumpsize) {
+		} else if ((size_t)statbuf.st_size != lumpsize) {
 			/* statefile exists, but is wrong size */
-			printf("statefile size (%d) differs from the calculated size (%d)\n",
-			    ((int)statbuf.st_size), lumpsize);
+			printf("statefile size (%" PRIuPTR ") differs from the calculated size (%" PRIuPTR ")\n",
+			    ((uintptr_t)statbuf.st_size), (uintptr_t)lumpsize);
 			daemon_shutdown(EXIT_FATAL, "statefile size differs from the calculated size");
 		}
 

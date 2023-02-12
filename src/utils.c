@@ -32,7 +32,8 @@
 int
 readline(int fd, void *vptr, size_t maxlen)
 {
-	ssize_t n, rc;
+	size_t n;
+	ssize_t rc;
 	char c, *ptr;
 
 	ptr = vptr;

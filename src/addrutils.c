@@ -185,7 +185,7 @@ grey_mask_v6(char *ipstr)
 		break;
 	}
 
-	for (i = 0; i < (sizeof(inaddr.s6_addr)/sizeof(inaddr.s6_addr[0])); i++) {
+	for (i = 0; i < (int)(sizeof(inaddr.s6_addr)/sizeof(inaddr.s6_addr[0])); i++) {
 		if (i < ctx->config.grey_mask6 >> 3) {
 			continue;
 		} else if (i > ctx->config.grey_mask6 >> 3) {

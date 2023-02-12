@@ -18,6 +18,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <stddef.h>
+
 #include "common.h"
 #include "proto_sjsms.h"
 #include "srvutils.h"
@@ -38,7 +40,7 @@ mappingstr(const char *from, char *to, size_t len)
 	from_ptr = from;
 	to_ptr = to;
 
-	while (from && *from_ptr && from_ptr - from < len - 3) {
+	while (from && *from_ptr && from_ptr - from < (ptrdiff_t)len - 3) {
 		assert(*from_ptr);
 		switch (*from_ptr) {
 		case ' ':
@@ -47,7 +49,7 @@ mappingstr(const char *from, char *to, size_t len)
 		}
 		*to_ptr++ = *from_ptr++;
 	}
-	if (from_ptr - from > len - 2)
+	if (from_ptr - from > (ptrdiff_t)len - 2)
 		return -1;
 	else
 		return 0;

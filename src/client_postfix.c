@@ -28,7 +28,7 @@ client_postfix(int argc, char **argv)
 	struct sockaddr_in gserv;
 	char mbuf[MAXLINELEN * 4];
 	char line[MAXLINELEN];
-	size_t linelen;
+	int linelen;
 	int opt = 1;
 	int counter = 0;
 	int match = 0;

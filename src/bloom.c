@@ -37,7 +37,7 @@ array_index(bitindex_t bit_index)
 void
 debug_print_filter(bloom_filter_t *filter, int with_newline)
 {
-	int i;
+	unsigned int i;
 
 	assert(filter);
 
@@ -308,7 +308,7 @@ optimal_size(unsigned int n, double c)
 bloom_filter_t *
 add_filter(bloom_filter_t *lvalue, const bloom_filter_t *rvalue)
 {
-	int i;
+	unsigned int i;
 
 	assert(lvalue);
 	assert(rvalue);
@@ -425,7 +425,7 @@ debug_print_ring_queue(bloom_ring_queue_t *brq, int with_newline)
 
 void
 insert_absolute_bloom_ring_queue(bloom_ring_queue_t *brq, bitarray_base_t buffer[],
-    int size, int index, unsigned int buf_index)
+    uint32_t size, int index, unsigned int buf_index)
 {
 	bitindex_t i;
 
@@ -444,7 +444,7 @@ insert_absolute_bloom_ring_queue(bloom_ring_queue_t *brq, bitarray_base_t buffer
 void
 sync_aggregate(bloom_ring_queue_t *brq)
 {
-	int i;
+	unsigned int i;
 	unsigned int index = brq->current_index;
 
 	zero_bloom_filter(brq->aggregate);

@@ -41,7 +41,7 @@ min(int x, int y)
 startup_sync_t
 sston(startup_sync_t ss)
 {
-	int i;
+	unsigned int i;
 	startup_sync_t ret_value;
 
 
@@ -58,7 +58,7 @@ sston(startup_sync_t ss)
 startup_sync_t
 sstoh(startup_sync_t ss)
 {
-	int i;
+	unsigned int i;
 	startup_sync_t ret_value;
 
 
@@ -382,11 +382,12 @@ void
 send_filters(peer_t *peer)
 {
 	int ret = -1;
-	int i, j;
+	unsigned int i;
+	uint32_t j;
 	int index;
 	startup_sync_t msg;
 	char *err;
-	int size = min(FILTER_SIZE, ctx->filter->group->filter_group[0]->size);
+	uint32_t size = min(FILTER_SIZE, ctx->filter->group->filter_group[0]->size);
 
 	for (i = 0; i < ctx->filter->group->group_size; i++) {
 		bzero(msg.filter, sizeof(bitarray_base_t) * FILTER_SIZE);

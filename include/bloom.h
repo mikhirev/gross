@@ -112,7 +112,7 @@ bloom_ring_queue_t *advance_bloom_rinq_queue(bloom_ring_queue_t *brq);
 unsigned int bloom_rinq_queue_next_index(bloom_ring_queue_t *brq);
 int is_in_ring_queue(bloom_ring_queue_t *brq, sha_256_t digest);
 void debug_print_ring_queue(bloom_ring_queue_t *brq, int with_newline);
-void insert_absolute_bloom_ring_queue(bloom_ring_queue_t *brq, bitarray_base_t buffer[], int size, int index,
+void insert_absolute_bloom_ring_queue(bloom_ring_queue_t *brq, bitarray_base_t buffer[], uint32_t size, int index,
     unsigned int buf_index);
 void sync_aggregate(bloom_ring_queue_t *brq);
 

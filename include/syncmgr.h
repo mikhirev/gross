@@ -61,7 +61,7 @@ typedef struct
 typedef struct
 {
 	bitindex_t filter_size;
-	int32_t num_bufs;
+	uint32_t num_bufs;
 } sync_config_t;
 
 typedef struct

@@ -307,7 +307,7 @@ read_config(const char *filename)
 	char *value[1];
 	params_t *params[1];
 	params_t *paramptr;
-	int paramcount;
+	uint32_t paramcount;
 	const char *valids[] = {
 		VALID_NAMES,
 		NULL

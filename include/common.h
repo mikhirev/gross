@@ -190,7 +190,7 @@ typedef struct
 	time_t rotate_interval;
 	time_t stat_interval;
 	bitindex_t filter_size;
-	unsigned int num_bufs;
+	uint32_t num_bufs;
 	char *statefile;
 	int loglevel;
 	int syslogfacility;

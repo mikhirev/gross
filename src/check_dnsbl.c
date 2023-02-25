@@ -165,8 +165,8 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	callback_arg_t *callback_arg;
 	const char *dnslname;
 	int timeused;
-	chkresult_t *result;
-	grey_tuple_t *request;
+	chkresult_t *result = NULL;
+	grey_tuple_t *request = NULL;
 	dns_check_info_t *check_info;
 	struct ares_options ares_opts = { 0 };
 
@@ -307,16 +307,20 @@ dnsblc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 
 	ares_cancel(*channel);
       FINISH:
-	if (done && check_info->type == TYPE_DNSWL) {
-		result->judgment = J_PASS;
-		result->checkname = dnslname;
-	} else {
-		result->judgment = J_UNDEFINED;
+	if (result) {
+		if (done && check_info->type == TYPE_DNSWL) {
+			result->judgment = J_PASS;
+			result->checkname = dnslname;
+		} else {
+			result->judgment = J_UNDEFINED;
+		}
 	}
 	send_result(edict, result);
 
 	logstr(GLOG_DEBUG, "dnsblc returning");
-	request_unlink(request);
+	if (request) {
+		request_unlink(request);
+	}
 
 	return 0;
 }

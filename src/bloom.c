@@ -92,7 +92,7 @@ bitarray_base_t
 add_mask(intraindex_t intra_index)
 {
 	assert(intra_index <= 32);
-	return 1 << intra_index;
+	return (bitarray_base_t)1 << intra_index;
 }
 
 bitarray_base_t

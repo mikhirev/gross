@@ -104,6 +104,7 @@ sfsistat
 mlfi_envfrom(SMFICTX * milter_ctx, char **argv)
 {
 	struct private_ctx_s *priv = MILTER_PRIVATE;
+	char *m_auth = NULL;
 	char *m_verify = NULL;
 	char *m_certsubj = NULL;
 
@@ -119,7 +120,7 @@ mlfi_envfrom(SMFICTX * milter_ctx, char **argv)
 
 	/* cetificate? */
 	m_verify = smfi_getsymval(milter_ctx, "{verify}");
-	if (NULL != m_verify && strcmp(0 == strcmp(m_verify, "OK"))) {
+	if (NULL != m_verify && (0 == strcmp(m_verify, "OK"))) {
 		m_certsubj = smfi_getsymval(milter_ctx, "{cert_subject}");
 		if (NULL != m_certsubj) {
 			logstr(GLOG_DEBUG, "milter: envfrom: %s: certauth as dn=%s, letting through", priv->sender, m_certsubj);

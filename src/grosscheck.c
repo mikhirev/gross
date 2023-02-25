@@ -73,7 +73,8 @@ grosscheck(char *arg, long *arglen, char *res, long *reslen)
 	FILE *foo;
 #endif
 	int fd;
-	struct sockaddr_in gserv1, gserv2, *gserv;
+	struct sockaddr_in gserv1, gserv2;
+	struct sockaddr_in *gserv = NULL;
 	struct timeval tv;
 	fd_set readers;
 

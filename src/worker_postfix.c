@@ -87,7 +87,7 @@ postfix_connection(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict
 				switch (status->status) {
 				case STATUS_TRUST:
 				case STATUS_MATCH:
-					if (snprintf(response, MAXLINELEN, "action=dunno"));
+					snprintf(response, MAXLINELEN, "action=dunno");
 					break;
 				case STATUS_BLOCK:
 					assemble_response(response, MAXLINELEN, ctx->config.postfix.responseblock,

@@ -59,10 +59,8 @@ reverse_inet4_addr(char *ipstr)
 static int
 reverse_inet6_addr(char *ipstr)
 {
-	int i;
 	int ret;
 	struct in6_addr inaddr;
-	const char *ptr;
 
 	if (strlen(ipstr) >= INET6_ADDRSTRLEN) {
 		return -1;

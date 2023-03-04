@@ -268,6 +268,7 @@ postfix_server(void *arg)
 			edict_unlink(edict);
 		}
 	}
+	unreachable();
 }
 
 void

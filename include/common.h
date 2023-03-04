@@ -128,6 +128,15 @@
 #define MIN(a,b) 	((a) < (b) ? (a) : (b))
 #endif
 
+/* Emulate C23 unreachable() macro */
+#ifndef unreachable
+# if __has_builtin(__builtin_unreachable)
+#  define unreachable() __builtin_unreachable()
+# else
+#  define unreachable()
+# endif
+#endif
+
 /*
  * common types
  */

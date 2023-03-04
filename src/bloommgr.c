@@ -116,7 +116,7 @@ bloommgr(void *arg)
 		}
 	}
 
-	/* NOTREACHED */ 
+	unreachable();
 	/* release_bloom_ring_queue(ctx->filter);*/
 }
 

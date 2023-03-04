@@ -129,6 +129,10 @@
 #endif
 
 /* Emulate C23 unreachable() macro */
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
 #ifndef unreachable
 # if __has_builtin(__builtin_unreachable)
 #  define unreachable() __builtin_unreachable()

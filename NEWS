@@ -1,3 +1,13 @@
+Version 1.0.3
+
+* properly handle IPv6 source addresses
+* check IPv6 addresses with DNSBL/DNSWL
+* fixed build with glibc (function name conflict)
+* fixed a number of errors found by static and dynamic analysis
+* fixed build with --enable-milter option (experimental)
+* fixed build with gcc -Werror=return-type
+* fixed mistakes in manual pages
+
 Version 1.0.2
 
 * do not check /etc/hosts in dnsbl check

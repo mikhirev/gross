@@ -137,7 +137,7 @@
 # if __has_builtin(__builtin_unreachable)
 #  define unreachable() __builtin_unreachable()
 # else
-#  define unreachable()
+#  define unreachable() assert(0), abort()
 # endif
 #endif
 

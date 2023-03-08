@@ -307,7 +307,7 @@ by issuing the following command:
 \fIgrossd\fP\|(8)
 .PP
 Gross project site:
-<http://code.google.com/p/gross/>
+<https://codeberg.org/bizdelnick/gross>
 .PP
 Bloom filters: <http://en.wikipedia.org/wiki/Bloom_filter>
 .SH "AUTHORS"

@@ -85,7 +85,7 @@ to the Internet.  It could be used for a DoS against a domain's
 Regarding the configuration both the daemon and \s-1MTA\s+1's, refer to 
 \fIgrossd.conf\fP\|(5)
 .PP
-Gross project site: <http://code.google.com/p/gross/>
+Gross project site: <https://codeberg.org/bizdelnick/gross>
 .PP
 Bloom filters: <http://en.wikipedia.org/wiki/Bloom_filter>
 .PP

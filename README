@@ -18,8 +18,10 @@ Exim and Sendmail.
 
 AUTHORS
 
-Gross is written by Eino Tuominen <eino@utu.fi> and
-Antti Siira <antti@utu.fi>
+Gross was originally written by Eino Tuominen <eino@utu.fi>
+and Antti Siira <antti@utu.fi>
+
+Since 2023 maintained by Dmitry Mikhirev <dmitry@mikhirev.ru>
 
 MOTIVATION
 
@@ -103,7 +105,7 @@ DEVELOPMENT AND LICENSING
 
 Gross is published on a BSD-like license.
 
-See http://code.google.com/p/gross/ for more information.
+See https://codeberg.org/bizdelnick/gross for more information.
 
 If you have any suggestions regarding the software or wish
 to take part on the development, feel free to contact the authors.

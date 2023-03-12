@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * Copyright (c) 2007 Eino Tuominen <eino@utu.fi>
  *

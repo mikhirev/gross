@@ -1,5 +1,3 @@
-# $Id$
-
 AM_CPPFLAGS = @REENTRANT_FLAG@ -I$(top_srcdir)/include
 
 sbin_PROGRAMS = grossd 

@@ -1,5 +1,3 @@
-dnl $Id$
-
 AC_INIT([gross],[svn])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE

@@ -1,5 +1,3 @@
-/* $Id$ */
-
 /*
  * You can find the original source easily with a google search
  * This file is slightly modified, unneeded functions are removed

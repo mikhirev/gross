@@ -23,9 +23,6 @@
 /* internal funtions */
 static void *dnstest(void *arg);
 
-/* dummy context */
-gross_ctx_t *ctx;
-
 #define THREADCOUNT 200
 
 static void *

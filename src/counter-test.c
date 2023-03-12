@@ -27,8 +27,6 @@
 /* internal functions */
 static void *countertest(void *arg); 
 
-/* dummy context */
-gross_ctx_t *ctx;
 unsigned *seed;
 
 static void *

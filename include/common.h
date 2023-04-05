@@ -19,11 +19,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-/* autoconf */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 /*
  * common system includes
  */
@@ -45,19 +40,15 @@
 #include <semaphore.h>
 #include <time.h>
 
-#ifdef HAVE_ARES_H
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif
+
+#ifdef DNSBL
 # include <ares.h>
 # include <ares_version.h>
-# define DNSBL
 #endif
 
-#ifdef HAVE_LIBMILTER
-# define MILTER
-#endif
-
-#ifdef HAVE_SPF2_SPF_H
-# define SPF
-#endif
 #if PROTOCOL == POSTFIX
 # define WORKER_PROTO_TCP
 #elif PROTOCOL == SJSMS

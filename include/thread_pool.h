@@ -20,6 +20,10 @@
 
 #include <signal.h>
 
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#endif
+
 typedef int mseconds_t;
 
 typedef struct thread_pool_s
@@ -106,8 +110,7 @@ typedef struct edict_message_s
 int submit_job(thread_pool_t *pool, edict_t *edict);
 thread_pool_t *create_thread_pool(const char *name, int (*routine) (thread_pool_t *, thread_ctx_t *,
 	edict_t *), pool_limits_t *limits, void *arg);
-edict_t *edict_get();
-edict_t *edict_get();
+edict_t *edict_get(bool forget);
 void send_result(edict_t *edict, void *result);
 void edict_unlink(edict_t *edict);
 

@@ -1,0 +1,386 @@
+= grossd.conf(5)
+
+:doctype: manpage
+
+== Name
+
+grossd.conf - Greylisting of Suspicious Sources daemon configuration
+file
+
+== Synopsis
+
+_{sysconfdir}/grossd.conf_
+
+== Description
+
+__grossd__(8) reads configuration data from _{sysconfdir}/grossd.conf_
+(or the file specified with *-f* on the command line). An example
+configuration file is installed by default. You have to set some
+configuration options in order to get __grossd__(8) running in your
+environment. The format is as follows:
+
+ name = value [ ; param ] ...
+
+Not all options accept parameters - refer to individual descriptions.
+The comment separator is '`#`', everything after it is ignored by the
+config file parser.
+
+=== Network configuration options
+
+*host*::
+is the address the server should listen for queries. Default is
+'`localhost`'.
+
+*port*::
+is the port the server should listen for queries. Default is 5525.
+
+*sync_listen*::
+is the address to listen for communication with the peer. It defaults
+to the *host* setting.
+
+*sync_peer*::
+is the address of the peer used when running in clustered mode.
+
+*sync_port*::
+is the tcp port number to listen to and connect to in communication
+with the peer. Default is 5524.
+
+*status_host*::
+is the address __grossd__(8) listens for status queries. Default is
+'`localhost`'.
+
+*status_port*::
+is the port number __grossd__(8) listens for status queries. Default is
+5522.
+
+*protocol*::
+activates the server protocols __grossd__(8) will support. Valid
+settings are '`sjsms`', '`postfix`' and '`milter`'.
+
+ifndef::no-milter[]
+*milter_listen*::
+is the socket address for the Milter service. The format is
+'`proto:port@host`'. Refer to Milter documentation for the specifics.
+endif::[]
+
+=== Core server options
+
+You can probably leave the default values for these settings. If your
+daily mail flow exceeds millions of messages per day you may want to
+tweak *query_timelimit* and/or *pool_maxthreads*. If you run
+__grossd__(8) in a server with limited memory you may want to adjust
+*filter_bits*.
+
+*filter_bits*::
+
+is the size of the Bloom filter. The size will be 2\^**filter_bits**.
+Lowering this value will increase the probability of false matches in
+each individual filter. Default is 24.
+
+*number_buffers*::
+is the number of Bloom filters used in the ring queue. Raising this
+value will cause an entry to stay in the server's memory longer.
+Default is 8.
+
+*rotate_interval*::
+is the number of seconds between Bloom filter rotations. Let *N :=
+number_buffers* and *I := rotate_interval*. An entry will stay in the
+server's memory for *N - 0.5 * I* seconds on average. Defaults to 3600
+seconds (one hour).
+
+*update*::
+is the way server updates the database. Valid options are '`grey`' and
+'`always`'. If set to '`grey`', which is the default, __grossd__(8) will
+update the database only if the response is '`STATUS_GREY`'. Setting it
+to '`always`' may reduce the impact on DNS servers.
+
+*grey_tuple*::
+is the greylisting tuple. Valid options are '`user`' and '`server`'. If
+set to '`user`', which is the default, __grossd__(8) will create the
+tuple from the masked '`smtp-client-ip`', sender email and recipient
+email. If set to '`server`' it will create the tuple from the masked
+'`smtp-client-ip`', the sender email domain and helo message.
+
+*grey_mask*::
+is the mask for __grossd__(8) to use when matching the '`smtp-client-ip`'
+against the database. Default is 24, which makes __grossd__(8) to treat
+addresses like _a.b.c.d_ as _a.b.c.0_. Setting *grey_mask* to 32 makes
+__grossd__(8) to require that consecutive attempts are made from the
+same '`smtp-client-ip`'.
+
+*grey_mask6*::
+is the same as *grey_mask* but for IPv6 addresses. Default is 64.
+
+*statefile*::
+is the full path of the file that the server uses to store the state
+information. Default is not to have a statefile. You may want to
+configure a *statefile* especially if you do not configure
+replication.
+
+*pidfile*::
+is the full path of the file __grossd__(8) writes its pid into. You can
+set parameter '`check`', if you want to keep __grossd__(8) from starting
+should pidfile already exist.
+
+=== Query constraints
+
+*grey_delay*::
+is the time in seconds new triplets are kept on the greylist. Default
+is 180.
+
+*query_timelimit*::
+is the query timeout in milliseconds. You may have to adjust this if
+you exceed millions of queries a day.
+
+*pool_maxthreads*::
+is the maximum threadcount per pool. You may have to raise the limit
+from the default if you get more than 100 queries per second and/or
+have slow DNS servers. The rule of thumb is to decide how many queries
+you want __grossd__(8) to be able to handle per second, and multiply
+that with *query_timelimit* (in seconds, of course). It defaults to
+100.
+
+=== Configuring server responses
+
+*block_threshold*::
+is the threshold after which __grossd__(8) sends a permanent error to
+the client. Every check that considers '`smtp-client-ip`' as suspicious
+returns a value (check weight). When sum of these values gets
+equivalent or greater than *block_threshold* __grossd__(8) sends a
+STATUS_BLOCK response. Default is 0 which disables this functionality.
+
+*block_reason*::
+is the reason given when client is too suspicious, see
+*block_threshold*. Default is “Bad reputation”.
+
+*grey_threshold*::
+is analogous to *block_threshold*, except at the threshold
+__grossd__(8) sends a STATUS_GREY response. Default is 1. If set to 0
+__grossd__(8) will greylist by default. This makes it possible to
+combine a traditional greylister and rbl checks.
+
+*grey_reason*::
+is the reason given when client is suspicious enough to be greylisted,
+see *grey_threshold*. Default is “Please try again later.”.
+
+=== Logging options
+
+*log_method*::
+is used to choose the logging method. Currently the only implemented
+method is '`syslog`', which is the default.
+
+*log_level*::
+sets the logging verbosity. Possible values in the order of increasing
+verbosity are '`error`', '`warning`', '`notice`', '`info`' and '`debug`'.
+*log_level* defaults to '`info`'.
+
+*syslog_facility*::
+is the facility syslog sends log messages with. It defaults to '`mail`'.
+
+*stat_type*::
+is the name of the requested statistic. It is of multivalued type. The
+valid options are:
++
+--
+[horizontal]
+'`full`'::: log all possible statistics
+'`none`'::: no statistics logging
+'`status`'::: basic set of statistics
+'`since_startup`'::: basic set since the startup
+'`delay`'::: log processing delay statistics
+--
++
+Default is '`none`'. Setting both '`none`' and '`full`' is undefined.
+
+*stat_interval*::
+is the number of seconds between status log entries. Default is 3600.
+
+=== Configuring checks
+
+*check*::
+is a multivalued option, that is, you can configure multiple checks by setting
+*check* option multiple times. Currently implemented
+ifndef::no-dnsbl[checks are '`dnsbl`', '`dnswl`', '`rhsbl`' and]
+ifdef::no-dnsbl[check is]
+'`blocker`'. Refer to sections describing the checks below. If you don't
+configure any checks __grossd__(8) will act as a traditional greylisting
+server.
+
+ifndef::no-dnsbl[]
+*dnsbl*::
+is a DNS domain name of the dnsbl that '`dnsbl`' *check* will query.
+There are no defaults, but the default configuration file lists a few
+as an example. If you have any locally administered block lists then
+you should be aware that __grossd__(8) makes all queries as fully
+qualified. You may assign different weights for the dnsbls, default
+weight is 1. Refer to *grey_threshold* and *block_threshold* about the
+weights. *dnsbl* is a multivalued option.
+
+*dnswl*::
+is analogous to *dnsbl*. Remember that *dnswl* is a _definitive_
+check, that is __grossd__(8) waits for the check to complete before
+deciding how to respond. This may cause unwanted latency, although you
+can adjust the maximum latency by *query_timelimit* option. *dnswl* is
+highly recommended if you use __grossd__(8) as a traditional
+greylister. This is a multivalued option.
+
+*rhsbl*::
+is analogous to *dnsbl*, but the check is made with the right hand
+side of the sender address (the email domain) instead of the IP
+address. This is a multivalued option.
+endif::[]
+
+*blocker_host*::
+is the host name of the Sophos blocker server. This is used only if
+*check* = '`blocker`' is set.
+
+*blocker_port*::
+is the TCP port of the Sophos blocker service. Default is 4466.
+
+*blocker_weight*::
+is the weight of the blocker check. See description of
+*grey_threshold* and *block_threshold* regarding the weights.
+
+=== Sun Java System Messaging Server specific options
+
+You may configure the responses __grossd__(8) sends over to grosscheck
+library.
+
+*sjsms_response_grey*::
+is the mapping result template __grossd__(8) uses for a STATUS_GREY
+result. Default is '`$X4.4.3|$N%reason%`', where '`%reason%`' is the
+template for the reason string.
+
+*sjsms_response_match*::
+is the mapping result template __grossd__(8) uses for a STATUS_MATCH
+result. Default is '`$Y`'.
+
+*sjsms_response_trust*::
+is the mapping result template __grossd__(8) uses for a STATUS_TRUST
+result. Default is '`$Y`'.
+
+*sjsms_response_block*::
+is the mapping result template __grossd__(8) uses for a STATUS_BLOCK
+result. Default is '`$N%reason%`', where '`%reason%`' is the template for
+the reason string.
+
+=== Postfix specific options
+
+*postfix_response_grey*::
+is the response template __grossd__(8) uses for a STATUS_GREY result.
+Default is `action=defer_if_permit %reason%', where '`%reason`' is the
+template for the reason string.
+
+*postfix_response_block*::
+is the response template __grossd__(8) uses for a STATUS_BLOCK result.
+Default is `action=reject %reason%', where '`%reason`' is the template
+for the reason string.
+
+== MTA configuration
+
+=== Sun Java System Messaging Server
+
+You have to add a mapping entry to set *SJSMS* to query __grossd__(8).
+It's also a good idea to exclude postmaster and abuse addresses before
+querying __grossd__(8).
+
+Here is an example:
+
+[subs="attributes"]
+----
+  ORIG_MAIL_ACCESS
+
+  ! allow all DSNs and MDNs
+    TCP|*|*|*|*|*|*|tcp_local||*|* $Y$E
+  ! allow all incoming mail to postmaster and abuse
+    TCP|*|*|*|*|*|*|tcp_local|*|*|postmaster@* $Y$E
+    TCP|*|*|*|*|*|*|tcp_local|*|*|abuse@* $Y$E
+  ! use gross to check all triplets (client_ip,sender,recipient)
+    TCP|*|*|*|*|SMTP/*|*|tcp_local|*|*|*
+$[{libdir}/grosscheck.so,grosscheck,10.10.13.1,10.10.13.2,5525,$2,$=$8$_,$=$6$_,$=$4$_]
+----
+
+Mapping call parameters are as follows:
+
+. full path of the _grosscheck.so_,
+. function name to call (always _grosscheck_),
+. first server's IP address,
+. second server's IP address,
+. UDP port for server connections,
+. SMTP client's IP address,
+. envelope sender's email address,
+. envelope recipient's email address,
+. HELO/EHLO string.
+
+=== Postfix
+
+Grossd implements native Postfix policy delegation protocol. Just
+specify grossd server address at the '`smtpd_recipient_restrictions`' in
+the main configuration file
+
+.main.cf
+----
+smtpd_recipient_restrictions =
+    ...
+   reject_unauth_destination
+   check_policy_service inet:host:port
+   ...
+----
+
+Refer to Postfix documentation at https://www.postfix.org for
+specifics.
+
+=== Exim
+
+Exim can be configured to query __grossd__(8) via Postfix policy
+delegation protocol.
+
+.Main section
+----
+ GROSS_QUERY = sender=$sender_address\\n\\
+   recipient=$local_part@$domain\\n\\
+   client_address=$sender_host_address\\n\\
+   grossd_mode=single\\n\\n
+----
+
+.Acl section
+----
+# gross
+warn
+  set acl_c0 = ${readsocket{inet:127.0.0.1:5525}{GROSS_QUERY}}
+
+defer
+  message = Please try again later.
+  condition = ${if match {$acl_c0}{action=defer_if_permit}}
+
+deny
+  message = ${if match {$acl_c0}{action=reject (.*)}{$1}\\
+    {Rejected by Gross.}}
+  condition = ${if match {$acl_c0}{action=reject}}
+----
+
+ifndef::no-milter[]
+=== Sendmail
+
+Sendmail can query grossd via milter protocol. Insert this in
+sendmail.mc and configure *milter_listen* accordingly:
+
+ INPUT_MAIL_FILTER(`Gross', `S=inet:5523@localhost, T=R:20s')
+
+You can check if your version of Sendmail has Milter support compiled in
+by issuing the following command:
+
+ sendmail -bt -d0.1
+endif::[]
+
+== See also
+
+__grossd__(8)
+
+Gross project site: https://codeberg.org/bizdelnick/gross
+
+Bloom filters: https://en.wikipedia.org/wiki/Bloom_filter
+
+== Authors
+
+Eino Tuominen and Antti Siira

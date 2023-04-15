@@ -92,10 +92,16 @@ unset(CMAKE_EXTRA_INCLUDE_FILES)
 find_package(c-ares)
 find_package(Milter)
 find_package(LibSpf2)
+find_package(Asciidoctor)
+
+if(NOT Asciidoctor_FOUND)
+  message(WARNING "asciidoctor not found, manual pages will not be built")
+endif()
 
 cmake_dependent_option(DNSBL "Enable DNSBL checking" ON c-ares_FOUND OFF)
 cmake_dependent_option(SPF "Enable SPF checking" ON LibSpf2_FOUND OFF)
 cmake_dependent_option(MILTER "Enable milter support" ON Milter_FOUND OFF)
+cmake_dependent_option(BUILD_DOCS "Build documentation" ON Asciidoctor_FOUND OFF)
 
 if(DNSBL)
   add_compile_definitions(DNSBL)

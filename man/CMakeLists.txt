@@ -1,15 +1,34 @@
-set(libdir ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})
-set(sysconfdir ${CMAKE_INSTALL_FULL_SYSCONFDIR})
-
-configure_file(grossd.8.in grossd.8 @ONLY)
-configure_file(grossd.conf.5.in grossd.conf.5 @ONLY)
-
-unset(libdir)
-unset(sysconfdir)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/grossd.8
-  DESTINATION ${CMAKE_INSTALL_MANDIR}/man8
+list(APPEND DOC_ATTRIBUTES
+  "libdir=${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME}"
+  "sysconfdir=${CMAKE_INSTALL_FULL_SYSCONFDIR}"
   )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/grossd.conf.5
-  DESTINATION ${CMAKE_INSTALL_MANDIR}/man5
-  )
+
+if(NOT DNSBL)
+  list(APPEND DOC_ATTRIBUTES no-dnsbl)
+endif()
+
+if(NOT MILTER)
+  list(APPEND DOC_ATTRIBUTES no-milter)
+endif()
+
+if(NOT SPF)
+  list(APPEND DOC_ATTRIBUTES no-spf)
+endif()
+
+function(gross_add_man _name _sect)
+  asciidoctor_add_document("${_name}.${_sect}"
+    SOURCE "${_name}.${_sect}.adoc"
+    BACKEND manpage
+    TYPE manpage
+    ATTRIBUTES ${DOC_ATTRIBUTES}
+    )
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_name}.${_sect}"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}/man${_sect}"
+    )
+endfunction()
+
+if(BUILD_DOCS)
+  gross_add_man(grossd 8)
+  gross_add_man(grossd.conf 5)
+endif()

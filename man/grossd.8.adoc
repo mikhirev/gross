@@ -12,19 +12,17 @@ grossd - Greylisting of Suspicious Sources - the Server
 
 == Description
 
-*grossd* is a greylisting server, and more. It's blazingly fast and
-amazingly resource efficient. It can be configured to query DNSBL
-databases, and enforce greylisting only for hosts that are found on
-those databases. It can block hosts that match multiple databases. It
-can be replicated and run parallel on two servers. It supports Sun Java
-System Messaging Server, Postfix and Exim. Sendmail Milter
-implementation needs testing.
+*grossd* is a greylisting server, and more. It's designed to be fast and
+resource efficient. It can be configured to perform various checks for sender
+server and enforce greylisting only for hosts that are found suspicious. It can
+block hosts that failed multiple checks. It can be replicated and run parallel
+on two servers. It supports Postfix, Exim, Sendmail (milter) and Oracle
+Communications Messaging Server.
 
 === Theory of operation
 
 Gross consists of *grossd*, the greylisting daemon, and a client library
-for SJSMS. The server also implements Postfix content filtering
-protocol.
+for OCMS. The server also implements Postfix content filtering protocol.
 
 Upon receiving a request from a client, *grossd* first validates it. The
 request includes a triplet ('`smtp-client-ip`', '`sender-address`',
@@ -86,6 +84,9 @@ Create the pidfile. Overwrite if it already exists.
 
 *-r*::
 Disable replication.
+
+*-u* _user_::
+Run as specified user.
 
 *-V*::
 Output version information and exit.

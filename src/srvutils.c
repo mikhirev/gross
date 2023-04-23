@@ -3,6 +3,9 @@
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
  *
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
@@ -79,7 +82,7 @@ statstr(int level, const char *fmt, ...)
 	vsnprintf(mbuf, MSGSZ, fmt, vap);
 	va_end(vap);
 
-	if (ctx->config.flags & FLG_NODAEMON)
+	if (ctx->config.flags & FLG_DEBUG)
 		return log_put(mbuf);
 
 	level = GLOG_NOTICE;
@@ -601,7 +604,7 @@ ipstr(struct sockaddr_in *saddr)
 int
 log_open(void)
 {
-        if ((ctx->config.flags & (FLG_NODAEMON | FLG_SYSLOG)) == FLG_SYSLOG) {
+        if ((ctx->config.flags & (FLG_DEBUG | FLG_SYSLOG)) == FLG_SYSLOG) {
 		if (ctx->syslog_open)
 			return -1;
                 openlog("grossd", LOG_ODELAY, ctx->config.syslogfacility);
@@ -616,7 +619,7 @@ log_open(void)
 int
 log_close(void)
 {
-        if ((ctx->config.flags & (FLG_NODAEMON | FLG_SYSLOG)) == FLG_SYSLOG) {
+        if ((ctx->config.flags & (FLG_DEBUG | FLG_SYSLOG)) == FLG_SYSLOG) {
 		if (! ctx->syslog_open)
 			return -1;
 		closelog();

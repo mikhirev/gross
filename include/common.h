@@ -3,6 +3,9 @@
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
  *
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
@@ -84,33 +87,34 @@
 #define MAXLINELEN      MSGSZ
 #define GROSSPORT	5525	/* default port for server */
 
-#define STARTUP_SYNC ((uint32_t)0x00)
-#define OPER_SYNC ((uint32_t)0x01)
-#define AGGREGATE_SYNC ((uint32_t)0x02)
+#define STARTUP_SYNC    ((uint32_t)1 << 0)
+#define OPER_SYNC       ((uint32_t)1 << 1)
+#define AGGREGATE_SYNC  ((uint32_t)1 << 2)
 
-#define FLG_NODAEMON (int)0x0001
-#define FLG_NOREPLICATE (int)0x0002
-#define FLG_UPDATE_ALWAYS (int)0x0004
-#define FLG_CREATE_STATEFILE (int)0x0008
-#define FLG_DRYRUN (int)0x0010
-#define FLG_SYSLOG (int)0x0020
-#define FLG_CHECK_PIDFILE (int)0x0040
-#define FLG_CREATE_PIDFILE (int)0x0080
-#define FLG_MATCH_SHORTCUT (int)0x0100
-#define FLG_RECONFIGURE_PENDING (int)0x0200
+#define FLG_DEBUG               ((int)1 <<  0)
+#define FLG_NOREPLICATE         ((int)1 <<  1)
+#define FLG_UPDATE_ALWAYS       ((int)1 <<  2)
+#define FLG_CREATE_STATEFILE    ((int)1 <<  3)
+#define FLG_DRYRUN              ((int)1 <<  4)
+#define FLG_SYSLOG              ((int)1 <<  5)
+#define FLG_CHECK_PIDFILE       ((int)1 <<  6)
+#define FLG_CREATE_PIDFILE      ((int)1 <<  7)
+#define FLG_MATCH_SHORTCUT      ((int)1 <<  8)
+#define FLG_RECONFIGURE_PENDING ((int)1 <<  9)
+#define FLG_NOFORK              ((int)1 << 10)
 
-#define CHECK_DNSBL (int)0x0001
-#define CHECK_BLOCKER (int)0x0002
-#define CHECK_RANDOM (int)0x0004
-#define CHECK_RHSBL (int)0x0008
-#define CHECK_DNSWL (int)0x0010
-#define CHECK_SPF (int)0x0020
-#define CHECK_REVERSE (int)0x0040
-#define CHECK_HELO (int)0x0080
+#define CHECK_DNSBL     ((int)1 << 0)
+#define CHECK_BLOCKER   ((int)1 << 1)
+#define CHECK_RANDOM    ((int)1 << 2)
+#define CHECK_RHSBL     ((int)1 << 3)
+#define CHECK_DNSWL     ((int)1 << 4)
+#define CHECK_SPF       ((int)1 << 5)
+#define CHECK_REVERSE   ((int)1 << 6)
+#define CHECK_HELO      ((int)1 << 7)
 
-#define PROTO_SJSMS (int)0x01
-#define PROTO_POSTFIX (int)0x02
-#define PROTO_MILTER (int)0x04
+#define PROTO_SJSMS     ((int)1 << 0)
+#define PROTO_POSTFIX   ((int)1 << 1)
+#define PROTO_MILTER    ((int)1 << 2)
 
 #define TMP_BUF_SIZE ((uint32_t)640)	/* 640 should be enough for everyone */
 #define THREAD_STACK_SIZE ((size_t)(1024 * 1024))	/* one megabyte */

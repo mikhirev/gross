@@ -60,8 +60,12 @@ Make debugging output more verbose. It can be set twice for maximum
 verbosity.
 
 *-d*::
-Run *grossd* on foreground without daemonizing the process. *grossd*
-will output to terminal instead of using syslog.
+Run *grossd* in debugging mode without daemonizing the process. *grossd* will
+output to terminal instead of using syslog.
+
+*-F*::
+Run in foreground without daemonizing the process. This option is intended for
+use with supervisor such as systemd.
 
 *-f* _config_::
 Specifies the name of the configuration file. The default is

@@ -3,6 +3,9 @@
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
  *
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
@@ -116,7 +119,7 @@ configure_grossd(configlist_t *config)
 	params_t *pp;
 
 	cp = config;
-	if (ctx->config.flags & (FLG_NODAEMON))
+	if (ctx->config.flags & (FLG_DEBUG))
 		while (cp) {
 			pp = cp->params;
 			*buffer = '\0';
@@ -574,18 +577,19 @@ mrproper(int signo)
 void
 usage(void)
 {
-	printf("Usage: grossd [-CDdhnPpruV] [-f configfile]\n");
-	printf("       -C	create statefile and exit\n");
-	printf("       -D	Enable debug logging (insane verbosity with -DD)\n");
-	printf("       -d	Run grossd as a foreground process\n");
-	printf("       -h	Print command usage and exit\n");
-	printf("       -f	override default configfile\n");
-	printf("       -n	dry run: always send TRUST\n");
+	printf("Usage: grossd [-CDdFhnPpruV] [-f configfile]\n");
+	printf("       -C       create statefile and exit\n");
+	printf("       -D       enable debug logging (insane verbosity with -DD)\n");
+	printf("       -d       debug mode: run in foreground and log to stdout\n");
+	printf("       -h       print command usage and exit\n");
+	printf("       -F       run grossd as a foreground process\n");
+	printf("       -f       override default configfile\n");
+	printf("       -n       dry run: always send TRUST\n");
 	printf("       -p file  write the process id in a pidfile\n");
 	printf("       -P file  same as -p, but pid file must not exist\n");
-	printf("       -r	disable replication\n");
-	printf("       -u user  run gross as user\n");	
-	printf("       -V	version information\n");
+	printf("       -r       disable replication\n");
+	printf("       -u user  run gross as user\n");
+	printf("       -V       version information\n");
 	exit(EXIT_USAGE);
 }
 
@@ -646,10 +650,10 @@ main(int argc, char *argv[])
 		daemon_shutdown(EXIT_FATAL, "Couldn't initialize context");
 
 	/* command line arguments */
-	while ((c = getopt(argc, argv, ":drf:VCDnp:P:u:")) != -1) {
+	while ((c = getopt(argc, argv, ":drf:VCDnp:P:u:hF")) != -1) {
 		switch (c) {
 		case 'd':
-			ctx->config.flags |= FLG_NODAEMON;
+			ctx->config.flags |= FLG_DEBUG;
 			break;
 		case 'n':
 			ctx->config.flags |= FLG_DRYRUN;
@@ -691,6 +695,9 @@ main(int argc, char *argv[])
 			break;
 		case 'h':
 			usage();
+			break;
+		case 'F':
+			ctx->config.flags |= FLG_NOFORK;
 			break;
 		default:
 			fprintf(stderr, "Unrecognized option: -%c\n", optopt);
@@ -736,7 +743,7 @@ main(int argc, char *argv[])
 		check_pidfile();
 
 	/* daemonize must be run before any pthread_create */
-	if ((ctx->config.flags & FLG_NODAEMON) == 0)
+	if ((ctx->config.flags & (FLG_DEBUG | FLG_NOFORK)) == 0)
 		daemonize();
 
 	if (ctx->config.flags & FLG_CREATE_PIDFILE)

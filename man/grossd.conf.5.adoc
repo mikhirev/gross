@@ -54,8 +54,11 @@ is the port number __grossd__(8) listens for status queries. Default is
 5522.
 
 *protocol*::
-activates the server protocols __grossd__(8) will support. Valid
-settings are '`sjsms`', '`postfix`' and '`milter`'.
+activates the server protocols __grossd__(8) will support.
+ifndef::no-milter[Valid settings are '`postfix`', '`milter`' and '`sjsms`'.]
+ifdef::no-milter[Valid settings are '`postfix`' and '`sjsms`'.]
+'`sjsms`' stands for Oracle Communications Messaging Server (ex Sun Java
+Messaging Server).
 
 ifndef::no-milter[]
 *milter_listen*::
@@ -72,7 +75,6 @@ __grossd__(8) in a server with limited memory you may want to adjust
 *filter_bits*.
 
 *filter_bits*::
-
 is the size of the Bloom filter. The size will be 2\^**filter_bits**.
 Lowering this value will increase the probability of false matches in
 each individual filter. Default is 24.
@@ -199,12 +201,32 @@ is the number of seconds between status log entries. Default is 3600.
 
 *check*::
 is a multivalued option, that is, you can configure multiple checks by setting
-*check* option multiple times. Currently implemented
-ifndef::no-dnsbl[checks are '`dnsbl`', '`dnswl`', '`rhsbl`' and]
-ifdef::no-dnsbl[check is]
-'`blocker`'. Refer to sections describing the checks below. If you don't
-configure any checks __grossd__(8) will act as a traditional greylisting
-server.
+*check* option multiple times.  If you don't configure any checks,
+__grossd__(8) will act as a traditional greylisting server. Currently
+available checks are:
+ifndef::no-dnsbl[]
+'`helo`':::
+check if remote server HELO name resolves to its IP address.
+'`reverse`':::
+check that the IP address of remote server has a reverse DNS record pointing
+to its HELO name.
+'`dnsbl`':::
+lookup the IP address of remote server against configured DNSBL servers (see
+below).
+'`dnswl`':::
+lookup the IP address of remote server against configured DNSWL servers (see
+below).
+'`rhsbl`':::
+lookup the right hand side of sender address against configured RHSBL servers
+(see below).
+endif::[]
+ifndef::no-spf::[]
+'`spf`':::
+check if the sender domain has a valid SPF record allowing the remote server to
+send its mail.
+endif::[]
+'`blocker`':::
+request Sophos blocker server.
 
 ifndef::no-dnsbl[]
 *dnsbl*::
@@ -241,7 +263,19 @@ is the TCP port of the Sophos blocker service. Default is 4466.
 is the weight of the blocker check. See description of
 *grey_threshold* and *block_threshold* regarding the weights.
 
-=== Sun Java System Messaging Server specific options
+=== Postfix specific options
+
+*postfix_response_grey*::
+is the response template __grossd__(8) uses for a STATUS_GREY result.
+Default is `action=defer_if_permit %reason%', where '`%reason`' is the
+template for the reason string.
+
+*postfix_response_block*::
+is the response template __grossd__(8) uses for a STATUS_BLOCK result.
+Default is `action=reject %reason%', where '`%reason`' is the template
+for the reason string.
+
+=== Oracle Communications Messaging Server specific options
 
 You may configure the responses __grossd__(8) sends over to grosscheck
 library.
@@ -264,53 +298,7 @@ is the mapping result template __grossd__(8) uses for a STATUS_BLOCK
 result. Default is '`$N%reason%`', where '`%reason%`' is the template for
 the reason string.
 
-=== Postfix specific options
-
-*postfix_response_grey*::
-is the response template __grossd__(8) uses for a STATUS_GREY result.
-Default is `action=defer_if_permit %reason%', where '`%reason`' is the
-template for the reason string.
-
-*postfix_response_block*::
-is the response template __grossd__(8) uses for a STATUS_BLOCK result.
-Default is `action=reject %reason%', where '`%reason`' is the template
-for the reason string.
-
 == MTA configuration
-
-=== Sun Java System Messaging Server
-
-You have to add a mapping entry to set *SJSMS* to query __grossd__(8).
-It's also a good idea to exclude postmaster and abuse addresses before
-querying __grossd__(8).
-
-Here is an example:
-
-[subs="attributes"]
-----
-  ORIG_MAIL_ACCESS
-
-  ! allow all DSNs and MDNs
-    TCP|*|*|*|*|*|*|tcp_local||*|* $Y$E
-  ! allow all incoming mail to postmaster and abuse
-    TCP|*|*|*|*|*|*|tcp_local|*|*|postmaster@* $Y$E
-    TCP|*|*|*|*|*|*|tcp_local|*|*|abuse@* $Y$E
-  ! use gross to check all triplets (client_ip,sender,recipient)
-    TCP|*|*|*|*|SMTP/*|*|tcp_local|*|*|*
-$[{libdir}/grosscheck.so,grosscheck,10.10.13.1,10.10.13.2,5525,$2,$=$8$_,$=$6$_,$=$4$_]
-----
-
-Mapping call parameters are as follows:
-
-. full path of the _grosscheck.so_,
-. function name to call (always _grosscheck_),
-. first server's IP address,
-. second server's IP address,
-. UDP port for server connections,
-. SMTP client's IP address,
-. envelope sender's email address,
-. envelope recipient's email address,
-. HELO/EHLO string.
 
 === Postfix
 
@@ -372,6 +360,40 @@ by issuing the following command:
 
  sendmail -bt -d0.1
 endif::[]
+
+=== Oracle Communications Messaging Server
+
+You have to add a mapping entry to set *OCMS* to query __grossd__(8).
+It's also a good idea to exclude postmaster and abuse addresses before
+querying __grossd__(8).
+
+Here is an example:
+
+[subs="attributes"]
+----
+  ORIG_MAIL_ACCESS
+
+  ! allow all DSNs and MDNs
+    TCP|*|*|*|*|*|*|tcp_local||*|* $Y$E
+  ! allow all incoming mail to postmaster and abuse
+    TCP|*|*|*|*|*|*|tcp_local|*|*|postmaster@* $Y$E
+    TCP|*|*|*|*|*|*|tcp_local|*|*|abuse@* $Y$E
+  ! use gross to check all triplets (client_ip,sender,recipient)
+    TCP|*|*|*|*|SMTP/*|*|tcp_local|*|*|*
+$[{libdir}/grosscheck.so,grosscheck,10.10.13.1,10.10.13.2,5525,$2,$=$8$_,$=$6$_,$=$4$_]
+----
+
+Mapping call parameters are as follows:
+
+. full path of the _grosscheck.so_,
+. function name to call (always _grosscheck_),
+. first server's IP address,
+. second server's IP address,
+. UDP port for server connections,
+. SMTP client's IP address,
+. envelope sender's email address,
+. envelope recipient's email address,
+. HELO/EHLO string.
 
 == See also
 

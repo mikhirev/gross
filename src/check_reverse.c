@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2023 Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2008
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
@@ -30,7 +32,7 @@ reverse(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 
 	grey_tuple_t *request;
 	const char *client_address;
-        char buf[INET_ADDRSTRLEN];
+	char buf[INET6_ADDRSTRLEN];
 	const char *ptr;
 	mseconds_t timelimit;
 
@@ -49,9 +51,11 @@ reverse(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	if (reversehost) {
                 logstr(GLOG_INSANE, "client_address (%s) has a PTR record (%s)",
                         client_address, reversehost->h_name);
-		canonicalhost = Gethostbyname(reversehost->h_name, timelimit);
+		canonicalhost = Gethostbyname(reversehost->h_name,
+				reversehost->h_addrtype, timelimit);
 		if (canonicalhost) {
-			ptr = inet_ntop(AF_INET, canonicalhost->h_addr_list[0], buf, INET_ADDRSTRLEN);
+			ptr = inet_ntop(canonicalhost->h_addrtype, canonicalhost->h_addr_list[0],
+					buf, INET6_ADDRSTRLEN);
 			assert(ptr);
 			logstr(GLOG_INSANE, "client_ip (%s) canonical (%s)",
 				client_address, buf);
@@ -62,7 +66,7 @@ reverse(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 				result->weight = 1; /* FIXME */
 			}
 		} else {
-			logstr(GLOG_DEBUG, "No A for PTR for client_ip (%s)", client_address);
+			logstr(GLOG_DEBUG, "No A/AAAA for PTR for client_ip (%s)", client_address);
 			result->judgment = J_SUSPICIOUS;
 			result->weight = 1;
 		}

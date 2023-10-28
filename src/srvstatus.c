@@ -38,9 +38,9 @@ static void *srvstatus(void *arg);
 #define QUEUE_ERR  ((unsigned int)50)
 
 int
-test_thread(pthread_t * thread)
+test_thread(pthread_t thread)
 {
-	int ret = pthread_kill(*thread, 0);
+	int ret = pthread_kill(thread, 0);
 
 	if (ret == 0)
 		return 1;

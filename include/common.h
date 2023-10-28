@@ -259,7 +259,7 @@ typedef struct tmout_action_s
 
 typedef struct
 {
-	pthread_t *thread;
+	pthread_t thread;
 	/*time_t watchdog; */
 } thread_info_t;
 

@@ -269,6 +269,7 @@ release_bloom_filter_group(bloom_filter_group_t *filter_group)
 		filter_group->filter_group[i] = 0x00;
 	}
 
+	Free(filter_group->filter_group);
 	Free(filter_group);
 }
 
@@ -297,9 +298,7 @@ optimal_size(unsigned int n, double c)
 			return result;
 	}
 
-	/* NOTREACHED */
-	assert(0);
-	return 0;
+	unreachable();
 }
 
 /* Adds filter rvalue to lvalue and return the address of lvalue */

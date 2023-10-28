@@ -27,6 +27,7 @@ typedef  unsigned long  int  ub4;
 typedef struct dns_request_s
 {
 	dns_request_type_t type;
+	int family;
 	void *query;
 #if ARES_VERSION_MAJOR > 0 && ARES_VERSION_MINOR > 4
 	void (*callback)(void *arg, int status, int timeouts, struct hostent *host);
@@ -37,8 +38,8 @@ typedef struct dns_request_s
 } dns_request_t;
 
 void helper_dns_init();
-struct hostent *Gethostbyname(const char *name, mseconds_t timeout);
-struct hostent *Gethostbyaddr(const char *addr, mseconds_t timeout);
+struct hostent *Gethostbyname(const char *name, int family, mseconds_t timeout);
+struct hostent *Gethostbyaddr(void *addr, int family, mseconds_t timeout);
 struct hostent *Gethostbyaddr_str(const char *addr, mseconds_t timeout);
 void free_hostent(struct hostent *host);
 ub4 one_at_a_time(char *key, ub4 len);

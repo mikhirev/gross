@@ -35,7 +35,7 @@ dnstest(void *arg)
 	int *errors = arg;
        
 	for (i=0; i < 1; i++) {
-		host = Gethostbyname("ns1.utu.fi", 0);
+		host = Gethostbyname("ns1.utu.fi", AF_INET, 0);
 		ptr = inet_ntop(AF_INET, host->h_addr_list[0], buf, INET_ADDRSTRLEN);
 		assert (ptr);
 		if (strcmp("130.232.1.1", buf))
@@ -96,9 +96,10 @@ main(int argc, char **argv)
 	/* fire up THREADCOUNT threads to do dns queries */
 	for(i=1; i < THREADCOUNT; i++)
 		create_thread(&threads[i], 0, &dnstest, &errors);
-	for (i=0; i < THREADCOUNT; i++)
-		if (0 != pthread_join(*threads[i].thread, NULL))
+	for (i=0; i < THREADCOUNT; i++) {
+		if (0 != pthread_join(threads[i].thread, NULL))
 			perror("pthread_join");
+	}
 
 	return(errors);
 }

@@ -81,7 +81,11 @@ spfc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 
 	spf_request = SPF_request_new(spf_server);
 
-	ret = SPF_request_set_ipv4_str(spf_request, request->client_address);
+	if (strchr(request->client_address, ':')) {
+		ret = SPF_request_set_ipv6_str(spf_request, request->client_address);
+	} else {
+		ret = SPF_request_set_ipv4_str(spf_request, request->client_address);
+	}
 	if (ret) {
 		logstr(GLOG_ERROR, "invalid IP address %s", request->client_address);
 		goto CLEANUP;
@@ -118,7 +122,7 @@ spfc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 		result->judgment = J_BLOCK;
 		logstr(GLOG_DEBUG, "SPF: fail");
 		smtp_error = SPF_response_get_smtp_comment(spf_response);
-		if (smtp_error) 
+		if (smtp_error)
 			result->reason = strdup(smtp_error);
 		else
 			result->reason = strdup("SPF: policy violation: (no message available)");

@@ -117,7 +117,7 @@ main(int argc, char **argv)
 	printf("  Waiting for the results...");
 	fflush(stdout);
 	for (i=0; i < THREADS; i++) {
-		ret = pthread_join(*threads[i].thread, (void **)&exitvalue);
+		ret = pthread_join(threads[i].thread, (void **)&exitvalue);
 		if (ret == 0) {
 			if (*exitvalue != 0) {
 				printf(" Thread returned %d (!= 0)\n", *exitvalue);
@@ -127,7 +127,6 @@ main(int argc, char **argv)
 			perror("pthread_join:");
 			return 2;
 		}
-		Free(threads[i].thread);
 		Free(exitvalue);
 	}
 	printf("  Done.\n");

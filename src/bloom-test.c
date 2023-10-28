@@ -332,6 +332,7 @@ main(int argc, char *argv[])
 
 	}
 	PRINTSTATUS;
+	release_bloom_ring_queue(brq);
 
 	snprintf(buf, MAXLINELEN - 1, "/tmp/test.state.%d", getpid());
 	ctx->config.statefile = strdup(buf);

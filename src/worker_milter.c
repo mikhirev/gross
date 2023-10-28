@@ -204,7 +204,7 @@ milter_watcher(void *arg)
 {
 	int ret;
 
-	ret = pthread_join(*ctx->process_parts.milter_server.thread, NULL);
+	ret = pthread_join(ctx->process_parts.milter_server.thread, NULL);
 	daemon_shutdown(EXIT_NOERROR, "milter exited");
 	
 	pthread_exit(NULL);

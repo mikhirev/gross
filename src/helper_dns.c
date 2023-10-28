@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2023 Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c)2008
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
@@ -56,18 +58,18 @@ typedef struct dns_reply_s
 } dns_reply_t;
 
 /* internal functions */
-struct hostent *lookup_str(const char *key);
-struct hostent *hostent_deepcopy(struct hostent *src);
+static struct hostent *lookup_str(const char *key);
+static struct hostent *hostent_deepcopy(struct hostent *src);
 static void
 #if ARES_VERSION_MAJOR > 0 && ARES_VERSION_MINOR > 4
 default_cb(void *arg, int status, int timeouts, struct hostent *host);
 #else
 default_cb(void *arg, int status, struct hostent *host);
 #endif
-void cache_str(char *key, struct hostent *value);
-int count_ptrs(char **ptr);
+static void cache_str(char *key, struct hostent *value);
+static int count_ptrs(char **ptr);
 
-struct hostent *
+static struct hostent *
 hostent_deepcopy(struct hostent *src)
 {
 	int i, alias_count, addr_count = 0;
@@ -75,7 +77,7 @@ hostent_deepcopy(struct hostent *src)
 	struct hostent *dst = Malloc(sizeof(struct hostent));
 
 	assert(src);
-	
+
 	if (src->h_name)
 		dst->h_name = strdup(src->h_name);
 	dst->h_addrtype = src->h_addrtype;
@@ -96,7 +98,7 @@ hostent_deepcopy(struct hostent *src)
 	for (i = 0; i < alias_count; i++)
 		dst->h_aliases[i] = strdup(src->h_aliases[i]);
 	dst->h_aliases[alias_count] = NULL;
-	
+
 	return dst;
 }
 
@@ -118,14 +120,14 @@ free_hostent(struct hostent *host)
 	Free(host);
 }
 
-int 
+static int
 count_ptrs(char **ptr)
 {
 	int i = 0;
 	while (ptr[i++]);
 	return i - 1 ; /* terminator (NULL) not counted */
 }
-	
+
 static void
 #if ARES_VERSION_MAJOR > 0 && ARES_VERSION_MINOR > 4
 default_cb(void *arg, int status, int timeouts, struct hostent *host)
@@ -134,19 +136,18 @@ default_cb(void *arg, int status, struct hostent *host)
 #endif
 {
         dns_cba_t *cba;
-	dns_reply_t *reply;
+	dns_reply_t reply;
 
         cba = (dns_cba_t *)arg;
-	reply = Malloc(sizeof(dns_reply_t));
 
         if (status == ARES_SUCCESS)
-		reply->host = hostent_deepcopy(host);
+		reply.host = hostent_deepcopy(host);
 	else
-		reply->host = NULL;
-	put_msg(cba->response_q, reply, sizeof(dns_reply_t));
+		reply.host = NULL;
+	put_msg(cba->response_q, &reply, sizeof(dns_reply_t));
 }
 
-void
+static void
 cache_str(char *key, struct hostent *value)
 {
 	/* ub4 hashvalue = one_at_a_time(key, strlen(key)); */
@@ -174,7 +175,7 @@ cache_str(char *key, struct hostent *value)
 	CACHE_UNLOCK;
 }
 
-struct hostent *
+static struct hostent *
 lookup_str(const char *key)
 {
 	/* ub4 hashvalue = one_at_a_time(key, strlen(key)); */
@@ -223,7 +224,7 @@ lookup_str(const char *key)
 }
 
 struct hostent *
-Gethostbyname(const char *name, mseconds_t timeout)
+Gethostbyname(const char *name, int family, mseconds_t timeout)
 {
 
 	dns_cba_t cba;
@@ -234,6 +235,7 @@ Gethostbyname(const char *name, mseconds_t timeout)
 	dns_request_t request;
 
 	request.type = HOSTBYNAME;
+	request.family = family;
 	request.query = (void *)name;
 	request.callback = &default_cb;
 	request.cba = &cba;
@@ -265,27 +267,36 @@ Gethostbyname(const char *name, mseconds_t timeout)
 struct hostent *
 Gethostbyaddr_str(const char *addr, mseconds_t timeout)
 {
-        struct in_addr inaddr;
-        int ret;
+        void *inaddr;
+        int ret, family;
+	struct hostent *host = NULL;
 
 	assert(addr);
-	ret = inet_pton(AF_INET, addr, &inaddr);
+
+	if (strchr(addr, ':')) {
+		family = AF_INET6;
+		inaddr = Malloc(sizeof(struct in6_addr));
+	} else {
+		family = AF_INET;
+		inaddr = Malloc(sizeof(struct in_addr));
+	}
+
+	ret = inet_pton(family, addr, inaddr);
+
 	if (ret < 0) {
 		gerror("inet_pton");
-		return NULL;
 	} else if (0 == ret) {
 		logstr(GLOG_ERROR, "invalid IP address: %s", addr);
-		return NULL;
 	} else {
-		return Gethostbyaddr((char *)&inaddr, 0);
+		host = Gethostbyaddr(inaddr, family, 0);
 	}
-	/* NOTREACHED */
-	assert(0);
-	return NULL;
+
+	Free(inaddr);
+	return host;
 }
 
 struct hostent *
-Gethostbyaddr(const char *addr, mseconds_t timeout)
+Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 {
 	dns_cba_t cba;
 	ares_channel *channel;
@@ -293,15 +304,16 @@ Gethostbyaddr(const char *addr, mseconds_t timeout)
 	dns_reply_t reply;
 	struct hostent *entry;
 	dns_request_t request;
-	char ipstr[INET_ADDRSTRLEN];
+	char ipstr[INET6_ADDRSTRLEN];
 	const char *ptr;
 
 	request.type = HOSTBYADDR;
-	request.query = (void *)addr;
+	request.family = family;
+	request.query = addr;
 	request.callback = &default_cb;
 	request.cba = &cba;
 
-	ptr = inet_ntop(AF_INET, addr, ipstr, INET_ADDRSTRLEN);
+	ptr = inet_ntop(family, addr, ipstr, INET6_ADDRSTRLEN);
 	if (NULL == ptr) {
 		gerror("inet_ntop");
 		return NULL;
@@ -341,6 +353,7 @@ helper_dns(void *arg)
 	int pipefd[2];
 	int ret;
 	int dns_wake;
+	int addrlen;
 	ssize_t size;
 	dns_request_t request;
 
@@ -380,7 +393,7 @@ helper_dns(void *arg)
 
 		FD_SET(dns_wake, &readers);
 		nfds = MAX(nfds, dns_wake + 1);
-		
+
 		count = select(nfds, &readers, &writers, NULL, tvp);
 		if (count < 0) {
 			daemon_fatal("select");
@@ -394,23 +407,34 @@ helper_dns(void *arg)
 					daemon_fatal("read");
 				switch (request.type) {
 				case HOSTBYNAME:
-					ares_gethostbyname(*channel, (char *)request.query, PF_INET, request.callback, request.cba);
+					ares_gethostbyname(*channel, (char *)request.query, request.family, request.callback, request.cba);
 					break;
 				case HOSTBYADDR:
-					ares_gethostbyaddr(*channel, (char *)request.query, 4, PF_INET, request.callback, request.cba);
+					switch (request.family) {
+					case AF_INET:
+						addrlen = sizeof(struct in_addr);
+						break;
+					case AF_INET6:
+						addrlen = sizeof(struct in6_addr);
+						break;
+					default:
+						logstr(GLOG_ERROR, "helper_dns: invalid address family");
+						goto CLEANUP;
+					}
+					ares_gethostbyaddr(*channel, (char *)request.query, addrlen, request.family, request.callback, request.cba);
 					break;
 				default:
 					logstr(GLOG_ERROR, "helper_dns: unknown request");
 					printf("Unknown request\n");
 				}
 			}
+CLEANUP:
 			/* clear out our wakening fd */
 			FD_CLR(dns_wake, &readers);
 			ares_process(*channel, &readers, &writers);
 		}
-			
 	}
-	/* never reached */
+	unreachable();
 }
 
 void
@@ -419,7 +443,7 @@ helper_dns_init()
 	int ret;
 
 	logstr(GLOG_INFO, "starting dns helper thread");
-	
+
 	pthread_mutex_init(&ctx->locks.helper_dns_guard.mx, NULL);
 	pthread_cond_init(&ctx->locks.helper_dns_guard.cv, NULL);
 

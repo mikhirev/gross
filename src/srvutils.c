@@ -500,14 +500,12 @@ Malloc(size_t size)
 /*
  * create_thread	- Wrapper, bails out if not successful.
  */
-void *
+void
 create_thread(thread_info_t *tinfo, int detach, void *(*routine) (void *), void *arg)
 {
-	pthread_t *tid;
+	pthread_t tid;
 	pthread_attr_t tattr;
 	int ret;
-
-	tid = (pthread_t *) Malloc(sizeof(pthread_t));
 
 	ret = pthread_attr_init(&tattr);
 	if (ret)
@@ -522,18 +520,14 @@ create_thread(thread_info_t *tinfo, int detach, void *(*routine) (void *), void 
 	if (ret)
 		daemon_fatal("pthread_attr_setstacksize");
 
-	ret = pthread_create(tid, &tattr, routine, arg);
+	ret = pthread_create(&tid, &tattr, routine, arg);
 	if (ret)
 		daemon_fatal("pthread_create");
 
 	if (tinfo)
 		tinfo->thread = tid;
-	else
-		Free(tid);
 
 	pthread_attr_destroy(&tattr);
-
-	return (void *)tid;
 }
 
 int

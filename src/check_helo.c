@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2023 Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2008
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
@@ -22,62 +24,51 @@
 #include "worker.h"
 #include "helper_dns.h"
 
-/*
- * Jeff Chan <jff.chan at gmail.com>:
- * "The code handled some cases with exception to RFCs. First, the code
- * allows underscores, which is not uncommon for misconfigured hostnames.
- * Second, even bracketed IP addresses that are RFC compliant, will get
- * greylisted."
- */
-bool
-check_helo(const char *helo)
+
+static bool
+valid_dn(const char *dn)
 {
-	int match_dot = 0;
-	int match_bad = 0;
-	int match_isalpha = 0;
-	int match_isnum = 0;
-	const char *ptr = helo, *tmp = helo;
-	char c;
+	const char *ptr = dn;
 
-	while (tmp && (c = tmp++[0]))
-		if (c == '/')
-			ptr = tmp;
-
-	while (ptr && (c = ptr++[0])) {
-		if (c == '-' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-			match_isalpha++;
-			continue;
-		} else if (c >= '0' && c<= '9') {
-			match_isnum++;
-			continue;
-		} else if (c == '.') {
-			match_dot++;
-			continue;
-		} else if (c == '_') {
-			continue;
-		} else {
-			match_bad++;
-			break;
+	while (*ptr != '\0') {
+		if (!((*ptr >= 'a' && *ptr <= 'z') ||
+				(*ptr >= 'A' && *ptr <= 'Z') ||
+				(*ptr >= '0' && *ptr <= '9')))
+		{
+			return false;
+		}
+		for (; *ptr != '\0' && *ptr != '.'; ptr++) {
+			if (!((*ptr >= 'a' && *ptr <= 'z') ||
+					(*ptr >= 'A' && *ptr <= 'Z') ||
+					(*ptr >= '0' && *ptr <= '9') ||
+					('-'  == *ptr && *(ptr+1) != '.' && *(ptr+1) != '\0')))
+			{
+				return false;
+			}
+		}
+		if ('.' == *ptr) {
+			if (*(ptr+1) == '\0') {
+				return false;
+			} else {
+				ptr++;
+			}
 		}
 	}
-	if (match_dot == 3 && match_isnum >= 4 && match_isalpha == 0)
-		return true;
-	else if (match_dot > 0 && match_bad == 0 && match_isnum + match_isalpha >= 2)
-		return false;
 
-	/* NOT REACHED */
-	assert(0);
+	return true;
 }
+
 
 int
 helo(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 {
 	chkresult_t *result;
 	struct hostent *host, *reversehost;
+	int family;
 	grey_tuple_t *request;
 	const char *helostr;
 	const char *client_address;
-	char addrstrbuf[INET_ADDRSTRLEN];
+	char addrstrbuf[INET6_ADDRSTRLEN];
 	const char *ptr;
 	mseconds_t timelimit;
 
@@ -87,6 +78,12 @@ helo(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	assert(helostr);
 	assert(client_address);
 
+	if (strchr(client_address, ':')) {
+		family = AF_INET6;
+	} else {
+		family = AF_INET;
+	}
+
 	result = (chkresult_t *)Malloc(sizeof(chkresult_t));
 	memset(result, 0, sizeof(*result));
 	result->judgment = J_UNDEFINED;
@@ -95,7 +92,7 @@ helo(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	timelimit = edict->timelimit;
 
 	/* check the validity of helo string */
-	if (check_helo(helostr)) {
+	if (!valid_dn(helostr)) {
 		logstr(GLOG_DEBUG, "Syntactically suspicious helo name");
 		/* one for invalid helo string AND one for not matching the client ip */
 		result->weight += 2; /* FIXME */
@@ -104,9 +101,9 @@ helo(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 	}
 
 	/* check if helo resolves to client ip */
-	host = Gethostbyname(helostr, timelimit);
+	host = Gethostbyname(helostr, family, timelimit);
 	if (host) {
-		ptr = inet_ntop(AF_INET, host->h_addr_list[0], addrstrbuf, INET_ADDRSTRLEN);
+		ptr = inet_ntop(family, host->h_addr_list[0], addrstrbuf, INET6_ADDRSTRLEN);
 		if (NULL == ptr) {
 			/* this should never happen */
 			logstr(GLOG_ERROR, "helo_name resolved to an invalid ip");
@@ -135,7 +132,8 @@ helo(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 			result->weight += 1; /* FIXME */
 		}
 	} else {
-		logstr(GLOG_INSANE, "client_address (%s) does not have a PTR record");
+		logstr(GLOG_DEBUG, "client_address (%s) does not have a PTR record",
+				client_address);
 		result->weight += 1; /* FIXME */
 	}
 

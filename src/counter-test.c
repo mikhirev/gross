@@ -129,7 +129,7 @@ main(int argc, char **argv)
 	printf("  Waiting for the results...");
 	fflush(stdout);
 	for (i=0; i < THREADCOUNT; i++) {
-		ret = pthread_join(*threads[i].thread, (void **)&ep);
+		ret = pthread_join(threads[i].thread, (void **)&ep);
 		if (ret == 0) {
 			if (ep == NULL) {
 				printf("\n  thread returned NULL pointer\n");
@@ -142,7 +142,6 @@ main(int argc, char **argv)
 		} else {
 			return 2;
 		}
-		Free(threads[i].thread);
 		Free(ep);
 	}
 	printf("  Done.\n");

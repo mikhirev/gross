@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2006,2007
  *               Eino Tuominen <eino@utu.fi>
  *
@@ -51,8 +54,8 @@ int get_delay_queue(const struct timespec *ts);
 int disable_delay(int msqid);
 int enable_delay(int msqid);
 int set_delay(int msqid, const struct timespec *ts);
-int put_msg(int msqid, void *msgp, size_t msgsz);
-int instant_msg(int msqid, void *msgp, size_t msgsz);
+int put_msg(int msqid, const void *msgp, size_t msgsz);
+int instant_msg(int msqid, const void *msgp, size_t msgsz);
 int release_queue(int msqid);
 size_t get_msg(int msqid, void *msgp, size_t maxsize);
 size_t get_msg_timed(int msqid, void *msgp, size_t maxsize, mseconds_t timeout);

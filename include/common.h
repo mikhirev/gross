@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <semaphore.h>
 #include <time.h>
+#include <stdatomic.h>
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -241,7 +242,7 @@ typedef struct dnsbl_s
 {
 	const char *name;
 	int weight;
-	int tolerancecounter;
+	atomic_int tolerancecounter;
 	struct dnsbl_s *next;	/* linked list */
 } dnsbl_t;
 #endif /* DNSBL */

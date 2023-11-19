@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
+if(POLICY CMP0127)
+  cmake_policy(SET CMP0127 NEW)
+endif()
+
 project(
   gross
   VERSION 1.1.0

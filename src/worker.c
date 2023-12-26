@@ -594,7 +594,8 @@ void
 querylogwrite(querylog_entry_t *q)
 {
 	char line[MAXLINELEN];
-	char buffer[MAXLINELEN];
+	size_t len = 0;
+	char *lineend = line;
 	char *actionstr;
 	check_match_t *m;
 
@@ -632,23 +633,26 @@ querylogwrite(querylog_entry_t *q)
 	if (NULL == q->recipient)
 		q->recipient = "N/A";
 
-	snprintf(line, MAXLINELEN - 1, "a=%s d=%d w=%d c=%s s=%s r=%s", actionstr, q->delay, q->totalweight,  q->client_ip, q->sender, q->recipient);
-	
+	len += snprintf(line, MAXLINELEN - 1, "a=%s d=%d w=%d c=%s s=%s r=%s", actionstr, q->delay, q->totalweight,  q->client_ip, q->sender, q->recipient);
+	lineend = line +len;
+
 	if (q->helo) {
-		snprintf(buffer, MAXLINELEN - 1, " h=%s", q->helo);
-		strncat(line, buffer, MAXLINELEN - 1);
+		len += snprintf(lineend, MAXLINELEN - len - 1, " h=%s", q->helo);
+		lineend = line + len;
 	}
 
 	m = q->match;
 	while (m) {
-		snprintf(buffer, MAXLINELEN - 1, " m=%s", m->name);
-		strncat(line, buffer, MAXLINELEN - 1);
+		len += snprintf(lineend, MAXLINELEN - len - 1, " m=%s", m->name);
+		lineend = line + len;
 		if (m->weight) {
-			snprintf(buffer, MAXLINELEN - 1, "%+d", m->weight);
-			strncat(line, buffer, MAXLINELEN - 1);
+			len += snprintf(lineend, MAXLINELEN - len - 1, "%+d", m->weight);
+			lineend = line + len;
 		}
 		m = m->next;
 	}
+
+	line[MAXLINELEN - 1] = '\0';
 
 	logstr(GLOG_INFO, "%s", line);
 }

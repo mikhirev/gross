@@ -115,7 +115,9 @@ configure_grossd(configlist_t *config)
 	configlist_t *cp;
 	const char *updatestr, *greytuplestr;
 	struct hostent *host = NULL;
-	char buffer[MAXLINELEN] = { '\0' };
+	char buffer[MAXLINELEN];
+	char *lineend;
+	size_t len;
 	params_t *pp;
 
 	cp = config;
@@ -123,11 +125,14 @@ configure_grossd(configlist_t *config)
 		while (cp) {
 			pp = cp->params;
 			*buffer = '\0';
+			lineend = buffer;
+			len = 0;
 			while (pp) {
-				strncat(buffer, " ; ", MAXLINELEN - 1);
-				strncat(buffer, pp->value, MAXLINELEN - 1);
+				len += snprintf(lineend, MAXLINELEN - len - 1, " ; %s", pp->value);
+				lineend = buffer + len;
 				pp = pp->next;
 			}
+			buffer[MAXLINELEN - 1] = '\0';
 			logstr(GLOG_DEBUG, "config: %s = %s%s", cp->name, cp->value, buffer);
 			cp = cp->next;
 		}

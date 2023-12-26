@@ -309,7 +309,7 @@ typedef struct gross_ctx_s
 	bloom_ring_queue_t *filter;
 	int update_q;
 	thread_locks_t locks;
-	time_t *last_rotate;
+	_Atomic time_t *last_rotate;
 #ifdef DNSBL
 	dnsbl_t *dnsbl;
 	dnsbl_t *dnswl;

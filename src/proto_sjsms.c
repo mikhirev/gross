@@ -86,9 +86,9 @@ recvquery(sjsms_msg_t *message, grey_req_t *request)
 char *
 recvquerystr(sjsms_msg_t *message)
 {
-	char querystr[MAXLINELEN] = { '\0' };
+	char querystr[MAXLINELEN];
 
-	snprintf(querystr, MAXLINELEN - 1, "%s", message->message);
+	strncpy(querystr, message->message, MAXLINELEN);
 	querystr[MAXLINELEN - 1] = '\0';
 
 	return strdup(querystr);

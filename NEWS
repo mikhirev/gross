@@ -1,3 +1,9 @@
+Version 1.0.4
+
+* fixed remotely exploited vulnerability that can be used
+  for denial-of-service attack and, potentially, arbitrary
+  code execution
+
 Version 1.0.3
 
 * properly handle IPv6 source addresses

@@ -142,6 +142,23 @@
 # endif
 #endif
 
+/* Explicit fallthrough to suppress compiler warnings */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
+#ifndef __has_c_attribute
+# define __has_c_attribute(x) 0
+#endif
+
+#if __has_c_attribute(fallthrough)
+# define FALLTHROUGH [[fallthrough]]
+#elif __has_attribute(fallthrough)
+# define FALLTHROUGH __attribute__ ((fallthrough))
+#else
+# define FALLTHROUGH
+#endif
+
 /*
  * common types
  */

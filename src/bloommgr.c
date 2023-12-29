@@ -24,16 +24,16 @@
 /* prototypes */
 static void *bloommgr(void *arg);
 
-static void *
-rotate(void *arg)
+static void
+rotate()
 {
-	logstr(GLOG_DEBUG, "rotate thread starting");
+	logstr(GLOG_DEBUG, "starting rotation");
 
 	ACTIVATE_BLOOM_GUARD();
 	if ((time(NULL) - *ctx->last_rotate) <= ctx->config.rotate_interval) {
 		RELEASE_BLOOM_GUARD();
 		logstr(GLOG_DEBUG, "rotation not needed");
-		return NULL;
+		return;
 	}
 
 	/*      debug_print_ring_queue(ctx->filter, TRUE); */
@@ -49,7 +49,6 @@ rotate(void *arg)
 	}
 	RELEASE_BLOOM_GUARD();
 	logstr(GLOG_DEBUG, "rotation completed");
-	return NULL;
 }
 
 static void *
@@ -101,7 +100,7 @@ bloommgr(void *arg)
 		case ROTATE:
 			logstr(GLOG_DEBUG, "received rotate command");
 			/* debug_print_ring_queue(ctx->filter, TRUE); */
-			create_thread(NULL, DETACH, &rotate, NULL);
+			rotate();
 			break;
 		case SYNC_AGGREGATE:
 			sync_aggregate(ctx->filter);

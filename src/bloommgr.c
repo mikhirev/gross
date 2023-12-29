@@ -69,10 +69,6 @@ bloommgr(void *arg)
 	/* pseudo-loop */
 	for (;;) {
 		size = get_msg(ctx->update_q, &message, MSGSZ);
-		if (size < 0) {
-			gerror("get_msg bloommgr");
-			continue;
-		}
 		switch (message.mtype) {
 		case UPDATE:
 			logstr(GLOG_DEBUG, "received update command");

@@ -145,6 +145,8 @@ default_cb(void *arg, int status, struct hostent *host)
 	else
 		reply.host = NULL;
 	put_msg(cba->response_q, &reply, sizeof(dns_reply_t));
+
+	Free(arg);
 }
 
 static void
@@ -227,31 +229,36 @@ struct hostent *
 Gethostbyname(const char *name, int family, mseconds_t timeout)
 {
 
-	dns_cba_t cba;
+	dns_cba_t *cba;
 	ares_channel *channel;
 	size_t size;
 	dns_reply_t reply;
 	struct hostent *entry;
 	dns_request_t request;
+	int response_q;
+
+	cba = Malloc(sizeof(dns_cba_t));
 
 	request.type = HOSTBYNAME;
 	request.family = family;
 	request.query = (void *)name;
 	request.callback = &default_cb;
-	request.cba = &cba;
+	request.cba = cba;
 
 	entry = lookup_str(name);
 
 	if (NULL == entry) {
 		channel = ctx->dns_channel;
-		cba.response_q = get_queue();
+		response_q = get_queue();
+		cba->response_q = response_q;
 		/* send the request via pipe to wake up the select loop */
 		size = write(ctx->dns_wake, &request, sizeof(request));
+		/* cba will be freed in callback, so don't use it below */
 		if (size != sizeof(request))
 			daemon_fatal("write");
 		/* wait for the reply via message queue */
-		size = get_msg_timed(cba.response_q, &reply, sizeof(dns_reply_t), timeout);
-		release_queue(cba.response_q);
+		size = get_msg_timed(response_q, &reply, sizeof(dns_reply_t), timeout);
+		release_queue(response_q);
 
 		if (size > 0) {
 			if (reply.host)
@@ -298,7 +305,7 @@ Gethostbyaddr_str(const char *addr, mseconds_t timeout)
 struct hostent *
 Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 {
-	dns_cba_t cba;
+	dns_cba_t *cba;
 	ares_channel *channel;
 	size_t size;
 	dns_reply_t reply;
@@ -306,12 +313,15 @@ Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 	dns_request_t request;
 	char ipstr[INET6_ADDRSTRLEN];
 	const char *ptr;
+	int response_q;
+
+	cba = Malloc(sizeof(dns_cba_t));
 
 	request.type = HOSTBYADDR;
 	request.family = family;
 	request.query = addr;
 	request.callback = &default_cb;
-	request.cba = &cba;
+	request.cba = cba;
 
 	ptr = inet_ntop(family, addr, ipstr, INET6_ADDRSTRLEN);
 	if (NULL == ptr) {
@@ -322,14 +332,15 @@ Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 
 	if (NULL == entry) {
 		channel = ctx->dns_channel;
-		cba.response_q = get_queue();
+		response_q = get_queue();
+		cba->response_q = response_q;
 		/* send the request via pipe to wake up the select loop */
 		size = write(ctx->dns_wake, &request, sizeof(request));
 		if (size != sizeof(request))
 			daemon_fatal("write");
 		/* wait for the reply via message queue */
-		size = get_msg_timed(cba.response_q, &reply, sizeof(dns_reply_t), timeout);
-		release_queue(cba.response_q);
+		size = get_msg_timed(response_q, &reply, sizeof(dns_reply_t), timeout);
+		release_queue(response_q);
 
 		if (size > 0) {
 			if (reply.host)

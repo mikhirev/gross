@@ -69,7 +69,7 @@ typedef struct
 	char magic[8];
 	bloom_ring_queue_t *brq;
 	size_t lumpsize;
-	time_t last_rotate;
+	_Atomic time_t last_rotate;
 } mmapped_brq_t;
 
 #define BITARRAY_SIZE_BITS ((int32_t)24)

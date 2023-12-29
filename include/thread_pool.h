@@ -24,6 +24,8 @@
 # include <stdbool.h>
 #endif
 
+#include <stdatomic.h>
+
 typedef int mseconds_t;
 
 typedef struct thread_pool_s
@@ -55,7 +57,7 @@ typedef struct edict_s
 {
 	void *job;
 	int resultmq;
-	bool obsolete;
+	atomic_bool obsolete;
 	reference_count_t reference;
 	mseconds_t timelimit;
 } edict_t;

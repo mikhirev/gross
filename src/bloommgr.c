@@ -29,7 +29,9 @@ rotate(void *arg)
 {
 	logstr(GLOG_DEBUG, "rotate thread starting");
 
+	ACTIVATE_BLOOM_GUARD();
 	if ((time(NULL) - *ctx->last_rotate) <= ctx->config.rotate_interval) {
+		RELEASE_BLOOM_GUARD();
 		logstr(GLOG_DEBUG, "rotation not needed");
 		return NULL;
 	}
@@ -37,7 +39,6 @@ rotate(void *arg)
 	/*      debug_print_ring_queue(ctx->filter, TRUE); */
 	logstr(GLOG_DEBUG, "Now: %d Last: %d Max-diff %d", time(NULL), *(ctx->last_rotate),
 	    ctx->config.rotate_interval * ctx->config.num_bufs);
-	ACTIVATE_BLOOM_GUARD();
 	if (time(NULL) - *(ctx->last_rotate) > ctx->config.rotate_interval * ctx->config.num_bufs) {
 		zero_bloom_ring_queue(ctx->filter);
 		*(ctx->last_rotate) = time(NULL);

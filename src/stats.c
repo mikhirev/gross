@@ -110,9 +110,11 @@ block_delay_update(double d)
 
 	if (ctx->stats.block_max_delay < d)
 		ctx->stats.block_max_delay = d;
+
+	d = ctx->stats.block_avg_delay;
 	RELEASE_STATS_GUARD();
 
-	return ctx->stats.block_avg_delay;
+	return d;
 }
 
 double
@@ -148,9 +150,11 @@ match_delay_update(double d)
 
 	if (ctx->stats.match_max_delay < d)
 		ctx->stats.match_max_delay = d;
+
+	d = ctx->stats.match_avg_delay;
 	RELEASE_STATS_GUARD();
 
-	return ctx->stats.match_avg_delay;
+	return d;
 }
 
 double
@@ -167,9 +171,11 @@ trust_delay_update(double d)
 
 	if (ctx->stats.trust_max_delay < d)
 		ctx->stats.trust_max_delay = d;
+
+	d = ctx->stats.trust_avg_delay;
 	RELEASE_STATS_GUARD();
 
-	return ctx->stats.trust_avg_delay;
+	return d;
 }
 
 char *
@@ -200,7 +206,9 @@ dnsbl_stats(char *buf, int32_t size)
 	tick += count;
 	size = size - count;
 
+	ACTIVATE_STATS_GUARD();
 	cur = ctx->stats.dnsbl_match;
+	RELEASE_STATS_GUARD();
 
 	while (cur) {
 		count = snprintf(tick, size, "%" PRIu64, cur->matches_startup);

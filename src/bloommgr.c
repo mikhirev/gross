@@ -57,7 +57,6 @@ bloommgr(void *arg)
 	update_message_t message;
 	sha_256_t digest;
 	int ret;
-	size_t size;
 	startup_sync_t ss;
 
 	ctx->filter = build_bloom_ring(ctx->config.num_bufs, ctx->config.filter_size);
@@ -68,7 +67,7 @@ bloommgr(void *arg)
 
 	/* pseudo-loop */
 	for (;;) {
-		size = get_msg(ctx->update_q, &message, MSGSZ);
+		get_msg(ctx->update_q, &message, MSGSZ);
 		switch (message.mtype) {
 		case UPDATE:
 			logstr(GLOG_DEBUG, "received update command");

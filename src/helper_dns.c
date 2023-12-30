@@ -230,7 +230,6 @@ Gethostbyname(const char *name, int family, mseconds_t timeout)
 {
 
 	dns_cba_t *cba;
-	ares_channel *channel;
 	size_t size;
 	dns_reply_t reply;
 	struct hostent *entry;
@@ -249,7 +248,6 @@ Gethostbyname(const char *name, int family, mseconds_t timeout)
 	request.callback = &default_cb;
 	request.cba = cba;
 
-	channel = ctx->dns_channel;
 	response_q = get_queue();
 	cba->response_q = response_q;
 
@@ -309,7 +307,6 @@ struct hostent *
 Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 {
 	dns_cba_t *cba;
-	ares_channel *channel;
 	size_t size;
 	dns_reply_t reply;
 	struct hostent *entry;
@@ -334,7 +331,6 @@ Gethostbyaddr(void *addr, int family, mseconds_t timeout)
 	entry = lookup_str(ipstr);
 
 	if (NULL == entry) {
-		channel = ctx->dns_channel;
 		response_q = get_queue();
 		cba->response_q = response_q;
 		/* send the request via pipe to wake up the select loop */

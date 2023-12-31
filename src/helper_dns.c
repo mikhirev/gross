@@ -237,6 +237,10 @@ Gethostbyname(const char *name, int family, mseconds_t timeout)
 	dns_request_t request;
 	int response_q;
 
+	if (entry = lookup_str(name)) {
+		return entry;
+	}
+
 	cba = Malloc(sizeof(dns_cba_t));
 
 	request.type = HOSTBYNAME;
@@ -245,29 +249,28 @@ Gethostbyname(const char *name, int family, mseconds_t timeout)
 	request.callback = &default_cb;
 	request.cba = cba;
 
-	entry = lookup_str(name);
+	channel = ctx->dns_channel;
+	response_q = get_queue();
+	cba->response_q = response_q;
 
-	if (NULL == entry) {
-		channel = ctx->dns_channel;
-		response_q = get_queue();
-		cba->response_q = response_q;
-		/* send the request via pipe to wake up the select loop */
-		size = write(ctx->dns_wake, &request, sizeof(request));
-		/* cba will be freed in callback, so don't use it below */
-		if (size != sizeof(request))
-			daemon_fatal("write");
-		/* wait for the reply via message queue */
-		size = get_msg_timed(response_q, &reply, sizeof(dns_reply_t), timeout);
-		release_queue(response_q);
+	/* send the request via pipe to wake up the select loop */
+	size = write(ctx->dns_wake, &request, sizeof(request));
 
-		if (size > 0) {
-			if (reply.host)
-				cache_str(strdup(name), reply.host);
-			return reply.host;
-		} else
-			return NULL;
+	/* cba will be freed in callback, so don't use it below */
+
+	if (size != sizeof(request)) {
+		daemon_fatal("write");
+	}
+	/* wait for the reply via message queue */
+	size = get_msg_timed(response_q, &reply, sizeof(dns_reply_t), timeout);
+	release_queue(response_q);
+
+	if (size > 0) {
+		if (reply.host)
+			cache_str(strdup(name), reply.host);
+		return reply.host;
 	} else {
-		return entry;
+		return NULL;
 	}
 }
 

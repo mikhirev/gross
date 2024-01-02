@@ -236,7 +236,7 @@ Gethostbyname(const char *name, int family, mseconds_t timeout)
 	dns_request_t request;
 	int response_q;
 
-	if (entry = lookup_str(name)) {
+	if ((entry = lookup_str(name))) {
 		return entry;
 	}
 

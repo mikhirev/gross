@@ -31,7 +31,7 @@ verbose_result(bool ok, char *message, char *digest_hex, char *reference_digest)
 	strncpy(tmp, message, 36);
 
 	if (strlen(message) > 36) {
-		strncat(tmp + 36, "...", 3);
+		strncat(tmp + 36, "...", 4);
 	}
 
 	if (ok) {

@@ -39,7 +39,7 @@ typedef struct msgqueue_s
 	struct msgqueue_s *delaypair;
 	const struct timespec *delay_ts;
 	int *impose_delay;	/* both the queues point to the same int */
-	bool active;
+	atomic_bool active;
 	int id;
 } msgqueue_t;
 

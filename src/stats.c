@@ -74,20 +74,18 @@ stat_add_dnsbl(const char *name)
 uint64_t
 stat_dnsbl_match(const char *name)
 {
-	dnsbl_stat_t *cur = ctx->stats.dnsbl_match;
+	dnsbl_stat_t *cur;
 	int max_dnsbl_name_len = 256;
 	int result = 0;
 
 	ACTIVATE_STATS_GUARD();
-	while (cur) {
+	for (cur = ctx->stats.dnsbl_match; cur != NULL; cur = cur->next) {
 		if (0 == strncmp(cur->dnsbl_name, name, max_dnsbl_name_len)) {
 			(cur->matches_startup)++;
 			logstr(GLOG_DEBUG, "%llu matches from %s", (cur->matches_startup), name);
 			result = cur->matches_startup;
 			break;
 		}
-
-		cur = cur->next;
 	}
 	RELEASE_STATS_GUARD();
 
@@ -131,9 +129,11 @@ greylist_delay_update(double d)
 
 	if (ctx->stats.greylist_max_delay < d)
 		ctx->stats.greylist_max_delay = d;
+
+	d = ctx->stats.greylist_avg_delay;
 	RELEASE_STATS_GUARD();
 
-	return ctx->stats.greylist_avg_delay;
+	return d;
 }
 
 double
@@ -182,14 +182,14 @@ char *
 dnsbl_stats(char *buf, int32_t size)
 {
 	int32_t count = 0;
-	dnsbl_stat_t *cur = ctx->stats.dnsbl_match;
+	dnsbl_stat_t *cur;
 	char *tick = buf;
 
 	count = snprintf(tick, size, "grossd dnsbl matches (");
 	tick += count;
 	size = size - count;
 
-	while (cur) {
+	for (cur = ctx->stats.dnsbl_match; cur != NULL; cur = cur->next) {
 		count = snprintf(tick, size, "%s", cur->dnsbl_name);
 		tick += count;
 		size = size - count;
@@ -198,8 +198,6 @@ dnsbl_stats(char *buf, int32_t size)
 			tick += count;
 			size = size - count;
 		}
-
-		cur = cur->next;
 	}
 
 	count = snprintf(tick, size, "): ");
@@ -207,10 +205,7 @@ dnsbl_stats(char *buf, int32_t size)
 	size = size - count;
 
 	ACTIVATE_STATS_GUARD();
-	cur = ctx->stats.dnsbl_match;
-	RELEASE_STATS_GUARD();
-
-	while (cur) {
+	for (cur = ctx->stats.dnsbl_match; cur != NULL; cur = cur->next) {
 		count = snprintf(tick, size, "%" PRIu64, cur->matches_startup);
 		tick += count;
 		size = size - count;
@@ -219,9 +214,8 @@ dnsbl_stats(char *buf, int32_t size)
 			tick += count;
 			size = size - count;
 		}
-
-		cur = cur->next;
 	}
+	RELEASE_STATS_GUARD();
 
 	return buf;
 }

@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2006, 2007, 2008
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
@@ -95,11 +98,14 @@ add_config_item(configlist_t **current, const char *name, const char *value,
 {
 	configlist_t *new;
 
+	assert(name);
+	assert(value);
+
 	new = (configlist_t *)Malloc(sizeof(configlist_t));
 	memset(new, 0, sizeof(configlist_t));
 
-	new->name = name;
-	new->value = value;
+	new->name = strdup(name);
+	new->value = strdup(value);
 	new->params = params;
 	new->is_default = is_default;
 	new->next = *current;
@@ -115,6 +121,9 @@ int
 record_config_item(configlist_t **config, const char *name, const char *value, params_t *params)
 {
 	configlist_t *cp, *prev, *delete;
+
+	assert(name);
+	assert(value);
 
 	cp = *config;
 	prev = NULL;
@@ -140,7 +149,8 @@ record_config_item(configlist_t **config, const char *name, const char *value, p
 	} else {
 		while (cp) {
 			if (strcmp(cp->name, name) == 0) {
-				cp->value = value;
+				Free(cp->value);
+				cp->value = strdup(value);
 				break;
 			}
 			cp = cp->next;
@@ -223,8 +233,6 @@ namevalueparams(char *buffer, char **name, char **value, params_t **params)
 			p->value = strdup(p->value);
 			p = p->next;
 		}
-		*name = strdup(*name);
-		*value = strdup(*value);
 		return 1;
 	} else {
 		return ret;

@@ -54,7 +54,6 @@ test_vector test_vectors[] = { {"1.2.3.4", "1.0.0.0", 8},
 int
 main(int argc, char **argv)
 {
-	int res;
 	int error_count = 0;
 	test_vector *test;
 	gross_ctx_t myctx = { 0x00 };

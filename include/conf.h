@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2006,2007,2008
  *               Eino Tuominen <eino@utu.fi>
  *
@@ -146,7 +149,7 @@ typedef struct configlist_s
 {
 	bool is_default;
 	const char *name;
-	const char *value;
+	char *value;
 	params_t *params;
 	struct configlist_s *next;	/* linked list */
 } configlist_t;

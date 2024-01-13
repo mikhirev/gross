@@ -31,7 +31,7 @@ verbose_result(bool ok, char *message, char *digest_hex, char *reference_digest)
 	strncpy(tmp, message, 36);
 
 	if (strlen(message) > 36) {
-		strncat(tmp + 36, "...", 3);
+		strncat(tmp + 36, "...", 4);
 	}
 
 	if (ok) {
@@ -46,7 +46,6 @@ verbose_result(bool ok, char *message, char *digest_hex, char *reference_digest)
 int
 main(int argc, char **argv)
 {
-	sha_256_t digest;
 	char message[MAX_MESSAGE_LEN] = { 0x00 };
 	char reference_digest[MAX_MESSAGE_LEN] = { 0x00 };
 	char digest_hex[MAX_MESSAGE_LEN] = { 0x00 };

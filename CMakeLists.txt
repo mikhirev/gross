@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
+if(POLICY CMP0127)
+  cmake_policy(SET CMP0127 NEW)
+endif()
+
 project(
   gross
   VERSION 1.1.0
@@ -15,6 +19,20 @@ include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CMakeDependentOption)
+
+if(NOT CMAKE_C_BYTE_ORDER)
+  # cmake < 3.20
+  include(TestBigEndian)
+  test_big_endian(BIG_ENDIAN)
+endif()
+
+if(CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN" OR BIG_ENDIAN)
+  add_compile_definitions(BIG_ENDIAN)
+endif()
+
+if(CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN" OR NOT CMAKE_C_BYTE_ORDER AND NOT BIG_ENDIAN)
+  add_compile_definitions(LITTLE_ENDIAN)
+endif()
 
 find_library(MATH_LIBRARY m DOC "standard math library")
 

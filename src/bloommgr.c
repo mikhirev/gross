@@ -24,16 +24,16 @@
 /* prototypes */
 static void *bloommgr(void *arg);
 
-static void *
-rotate(void *arg)
+static void
+rotate()
 {
-	logstr(GLOG_DEBUG, "rotate thread starting");
+	logstr(GLOG_DEBUG, "starting rotation");
 
 	ACTIVATE_BLOOM_GUARD();
 	if ((time(NULL) - *ctx->last_rotate) <= ctx->config.rotate_interval) {
 		RELEASE_BLOOM_GUARD();
 		logstr(GLOG_DEBUG, "rotation not needed");
-		return NULL;
+		return;
 	}
 
 	/*      debug_print_ring_queue(ctx->filter, TRUE); */
@@ -49,7 +49,6 @@ rotate(void *arg)
 	}
 	RELEASE_BLOOM_GUARD();
 	logstr(GLOG_DEBUG, "rotation completed");
-	return NULL;
 }
 
 static void *
@@ -58,7 +57,6 @@ bloommgr(void *arg)
 	update_message_t message;
 	sha_256_t digest;
 	int ret;
-	size_t size;
 	startup_sync_t ss;
 
 	ctx->filter = build_bloom_ring(ctx->config.num_bufs, ctx->config.filter_size);
@@ -69,11 +67,7 @@ bloommgr(void *arg)
 
 	/* pseudo-loop */
 	for (;;) {
-		size = get_msg(ctx->update_q, &message, MSGSZ);
-		if (size < 0) {
-			gerror("get_msg bloommgr");
-			continue;
-		}
+		get_msg(ctx->update_q, &message, MSGSZ);
 		switch (message.mtype) {
 		case UPDATE:
 			logstr(GLOG_DEBUG, "received update command");
@@ -101,7 +95,7 @@ bloommgr(void *arg)
 		case ROTATE:
 			logstr(GLOG_DEBUG, "received rotate command");
 			/* debug_print_ring_queue(ctx->filter, TRUE); */
-			create_thread(NULL, DETACH, &rotate, NULL);
+			rotate();
 			break;
 		case SYNC_AGGREGATE:
 			sync_aggregate(ctx->filter);

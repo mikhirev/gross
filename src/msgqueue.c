@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2023
+ *               Dmitry Mikhirev <dmitry@mikhirev.ru>
+ *
  * Copyright (c) 2006, 2007, 2008
  *               Eino Tuominen <eino@utu.fi>
  *               Antti Siira <antti@utu.fi>
@@ -408,7 +411,7 @@ put_msg_raw(msgqueue_t *mq, msg_t *msg)
 }
 
 int
-put_msg(int msqid, void *omsgp, size_t msgsz)
+put_msg(int msqid, const void *omsgp, size_t msgsz)
 {
 	msgqueue_t *mq;
 	msg_t *new;
@@ -436,7 +439,7 @@ put_msg(int msqid, void *omsgp, size_t msgsz)
 }
 
 int
-instant_msg(int msqid, void *omsgp, size_t msgsz)
+instant_msg(int msqid, const void *omsgp, size_t msgsz)
 {
 	msgqueue_t *mq;
 	msg_t *new;

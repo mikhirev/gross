@@ -31,13 +31,12 @@ gross_ctx_t *ctx;
 
 /* prototypes of internals */
 int log_put(const char *msg);
-size_t date_fmt(char *msg, size_t len);
 
 int
 logstr(int level, const char *fmt, ...)
 {
-	char logfmt[MSGSZ] = { '\0' };
-	char mbuf[MSGSZ] = { '\0' };
+	char logfmt[MSGSZ];
+	char mbuf[MSGSZ];
 	va_list vap;
 
 	if (level > ctx->config.loglevel) {
@@ -46,10 +45,12 @@ logstr(int level, const char *fmt, ...)
 
 	/* prepend thread id */
 	snprintf(logfmt, MSGSZ, "#%x: %s", (uint32_t) pthread_self(), fmt);
+	logfmt[MSGSZ-1] = '\0';
 
 	va_start(vap, fmt);
 	vsnprintf(mbuf, MSGSZ, logfmt, vap);
 	va_end(vap);
+	mbuf[MSGSZ-1] = '\0';
 
 	if (false == ctx->syslog_open)
 		return log_put(mbuf);
@@ -67,7 +68,7 @@ logstr(int level, const char *fmt, ...)
 int
 statstr(int level, const char *fmt, ...)
 {
-	char mbuf[MSGSZ] = { 0x00 };
+	char mbuf[MSGSZ];
 	va_list vap;
 
 	if ((level & ctx->config.statlevel) == STATS_NONE) {
@@ -81,6 +82,7 @@ statstr(int level, const char *fmt, ...)
 	va_start(vap, fmt);
 	vsnprintf(mbuf, MSGSZ, fmt, vap);
 	va_end(vap);
+	mbuf[MSGSZ-1] = '\0';
 
 	if (ctx->config.flags & FLG_DEBUG)
 		return log_put(mbuf);
@@ -108,6 +110,7 @@ daemon_shutdown(int return_code, const char *fmt, ...)
 		va_start(vap, fmt);
 		vsnprintf(out, MSGSZ, logfmt, vap);
 		va_end(vap);
+		out[MSGSZ-1] = '\0';
 
 		fprintf(stderr, "%s\n", out);
 
@@ -533,33 +536,16 @@ create_thread(thread_info_t *tinfo, int detach, void *(*routine) (void *), void 
 int
 log_put(const char *msg)
 {
-	char *final;
-
-	final = Malloc(MSGSZ);
-	snprintf(final, MSGSZ - 1, "%s", msg);
-	date_fmt(final, MSGSZ);
-	printf("%s", final);
-	Free(final);
-	fflush(stdout);
-	return 0;
-}
-
-size_t
-date_fmt(char *msg, size_t len)
-{
 	time_t tt;
 	char timestr[DATESTRLEN];
-	char buf[MSGSZ];
 
 	tt = time(NULL);
 	ctime_r(&tt, timestr);
 	chomp(timestr);
 
-	snprintf(buf, MSGSZ - 1, "%s %s\n", timestr, msg);
-	strncpy(msg, buf, len - 1);
-	msg[len - 1] = '\0';
-
-	return strlen(msg);
+	printf("%s %s\n", timestr, msg);
+	fflush(stdout);
+	return 0;
 }
 
 void

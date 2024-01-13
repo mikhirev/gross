@@ -39,13 +39,11 @@ cleanup_spfc(void *state)
 int
 spfc(thread_pool_t *info, thread_ctx_t *thread_ctx, edict_t *edict)
 {
-	struct timespec ts, start, now, timeleft;
 	chkresult_t *result;
 	grey_tuple_t *request;
 	SPF_server_t *spf_server = NULL;
 	SPF_request_t *spf_request = NULL;
 	SPF_response_t *spf_response = NULL;
-	SPF_response_t *spf_response_2mx = NULL;
 	const char *smtp_error;
 	int ret;
 

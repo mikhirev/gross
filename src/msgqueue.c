@@ -31,7 +31,9 @@
 #include "srvutils.h"
 #include "utils.h"
 
-#define GLOBAL_QUEUE_LOCK { assert(pthread_mutex_lock(&global_queue_lk) == 0); }
+#define GLOBAL_QUEUE_LOCK if (pthread_mutex_lock(&global_queue_lk) != 0) {\
+	daemon_fatal("GLOBAL_QUEUE_LOCK");\
+}
 #define GLOBAL_QUEUE_UNLOCK { pthread_mutex_unlock(&global_queue_lk); }
 
 /* prototypes of internals */

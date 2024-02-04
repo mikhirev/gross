@@ -26,7 +26,9 @@
 #include "counter.h"
 #include "srvutils.h"
 
-#define GLOBAL_COUNTER_LOCK { assert(pthread_mutex_lock(&global_counter_lk) == 0); }
+#define GLOBAL_COUNTER_LOCK if (pthread_mutex_lock(&global_counter_lk) != 0) { \
+	daemon_fatal("GLOBAL_COUNTER_LOCK");\
+}
 #define GLOBAL_COUNTER_UNLOCK { pthread_mutex_unlock(&global_counter_lk); }
 
 /* prototypes of internals */

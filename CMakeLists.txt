@@ -10,6 +10,8 @@ project(
   LANGUAGES C
   )
 
+set(VERSION_SUFFIX ~a1)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(GNUInstallDirs)
@@ -147,13 +149,13 @@ if(SPF)
 endif()
 
 add_compile_definitions(
-  "CONFIGFILE=\"${SYSCONFDIR}/grossd.conf\""
-  "VERSION=\"${CMAKE_PACKAGE_VERSION}\""
+  CONFIGFILE=\"${CMAKE_INSTALL_FULL_SYSCONFDIR}/grossd.conf\"
+  VERSION=\"${CMAKE_PROJECT_VERSION}${VERSION_SUFFIX}\"
   )
 
 add_subdirectory("src")
 add_subdirectory("man")
 
 install(FILES doc/examples/grossd.conf
-  TYPE SYSCONF
+  DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}
   )

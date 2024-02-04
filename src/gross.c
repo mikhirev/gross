@@ -44,6 +44,14 @@
 #include "check_blocker.h"
 #include "check_random.h"
 
+#ifndef VERSION
+# define VERSION "unknown"
+#endif
+
+#ifndef CONFIGFILE
+# define CONFIGFILE "grossd.conf"
+#endif
+
 /* maximum simultaneus tcp worker threads */
 #define MAXWORKERS 1
 

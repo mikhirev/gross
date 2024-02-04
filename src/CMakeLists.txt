@@ -131,6 +131,10 @@ if(BUILD_TESTING)
       Threads::Threads
       )
     add_test(helper_dns helper_dns)
+    set_property(
+      TEST helper_dns
+      PROPERTY LABELS net
+      )
   endif()
 
   add_executable(mask

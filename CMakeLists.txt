@@ -10,7 +10,7 @@ project(
   LANGUAGES C
   )
 
-set(VERSION_SUFFIX ~a1)
+set(VERSION_SUFFIX ~git)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 

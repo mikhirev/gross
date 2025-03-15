@@ -152,7 +152,7 @@ Default is `none'.  Setting both `none' and `full'
 is undefined.
 .RE
 .IP "\fBstat_interval\fP" 4
-is the number of seconds between status log entries.  Default is 3600.
+is the number of seconds between status log entries.  Default is 300.
 .SS "Configuring checks"
 .IP "\fBcheck\fP" 4
 is a multivalued option, that is, you can configure multiple checks by

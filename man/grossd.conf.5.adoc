@@ -195,7 +195,7 @@ valid options are:
 Default is '`none`'. Setting both '`none`' and '`full`' is undefined.
 
 *stat_interval*::
-is the number of seconds between status log entries. Default is 3600.
+is the number of seconds between status log entries. Default is 300.
 
 === Configuring checks
 

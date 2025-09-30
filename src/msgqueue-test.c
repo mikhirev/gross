@@ -58,7 +58,7 @@ msgqueueping(void *arg)
 		} else {
 			/* avoid ++ to lure out concurrency problems */
 			tmp = *counter + 1;
-			usleep(1000);
+			sleep(1);
 			*counter = tmp;
 			put_msg(qpair->outq, &counter, sizeof(int *));
 		}

@@ -71,7 +71,7 @@ int min(int x, int y);
 
 int send_startup_sync(peer_t *peer, startup_sync_t *sync);
 int send_oper_sync(peer_t *peer, oper_sync_t *sync);
-int force_peer_aggregate();
+int force_peer_aggregate(peer_t *peer);
 void send_filters(peer_t *peer);
 
 void *recv_syncs(void *arg);

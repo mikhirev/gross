@@ -282,7 +282,7 @@ edict_get(bool forget)
 	edict_t *edict;
 
 	edict = (edict_t *)Malloc(sizeof(edict_t));
-	bzero(edict, sizeof(edict_t));
+	memset(edict, 0x00, sizeof(edict_t));
 
 	/* reserve a message queue, if results are wanted */
 	if (false == forget)

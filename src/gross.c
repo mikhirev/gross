@@ -18,6 +18,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _DEFAULT_SOURCE
+
 #include <netdb.h>
 #include <signal.h>
 #include <syslog.h>

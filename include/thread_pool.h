@@ -68,7 +68,7 @@ typedef struct watchdog_s
 typedef struct
 {
 	void *state;
-	int (*cleanup) ();
+	int (*cleanup) (void *state);
 	watchdog_t watchdog;
 } thread_ctx_t;
 

@@ -81,7 +81,7 @@ mlfi_connect(SMFICTX * milter_ctx, char *hostname, _SOCK_ADDR * hostaddr)
 	}
 
 	priv = Malloc(sizeof(*priv));
-	bzero(priv, sizeof(*priv));
+	memset(priv, 0x00, sizeof(*priv));
 	priv->client_address = strdup(caddr);
 	smfi_setpriv(milter_ctx, priv);
 

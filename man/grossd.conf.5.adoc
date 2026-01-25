@@ -75,7 +75,7 @@ __grossd__(8) in a server with limited memory you may want to adjust
 *filter_bits*.
 
 *filter_bits*::
-is the size of the Bloom filter. The size will be 2\^**filter_bits**.
+is the size of the Bloom filter. The size will be 2^**filter_bits**^.
 Lowering this value will increase the probability of false matches in
 each individual filter. Default is 24.
 
@@ -87,7 +87,7 @@ Default is 8.
 *rotate_interval*::
 is the number of seconds between Bloom filter rotations. Let *N :=
 number_buffers* and *I := rotate_interval*. An entry will stay in the
-server's memory for *N - 0.5 * I* seconds on average. Defaults to 3600
+server's memory for *(N - 0.5) * I* seconds on average. Defaults to 3600
 seconds (one hour).
 
 *update*::

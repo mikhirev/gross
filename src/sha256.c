@@ -170,7 +170,7 @@ sha256(sha_byte_t *message, sha_ulong_t size)
 	(*p_convert_int64_to_big_endian) (&tmp_size);
 
 	for (i = 0; i < new_size; i += 64) {
-		bzero(digestable_block, 64);
+		memset(digestable_block, 0x00, 64);
 		if (i + 64 <= size) {
 			memcpy((void *)digestable_block, (const void *)(message + i), 64);
 		}

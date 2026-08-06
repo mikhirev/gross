@@ -19,6 +19,8 @@
 #ifndef STATS_H
 #define STATS_H
 
+#include <pthread.h>
+
 struct dnsbl_stat
 {
 	char *dnsbl_name;

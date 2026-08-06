@@ -14,6 +14,11 @@ set(VERSION_SUFFIX ~git)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+add_compile_definitions(_POSIX_C_SOURCE=200809L)
+set(CMAKE_REQUIRED_DEFINITIONS -D_POSIX_C_SOURCE=200809L)
+add_compile_definitions(_DEFAULT_SOURCE)
+set(CMAKE_REQUIRED_DEFINITIONS -D_DEFAULT_SOURCE)
+
 include(GNUInstallDirs)
 include(CTest)
 include(CheckFunctionExists)

@@ -91,7 +91,7 @@ request_new()
 	grey_tuple_t *request;
 
 	request = Malloc(sizeof(grey_tuple_t));
-	bzero(request, sizeof(grey_tuple_t));
+	memset(request, 0x00, sizeof(grey_tuple_t));
 
 	pthread_mutex_init(&request->reference.mx, NULL);
 	request->reference.count = 1;

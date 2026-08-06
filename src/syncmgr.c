@@ -390,7 +390,7 @@ send_filters(peer_t *peer)
 	uint32_t size = min(FILTER_SIZE, ctx->filter->group->filter_group[0]->size);
 
 	for (i = 0; i < ctx->filter->group->group_size; i++) {
-		bzero(msg.filter, sizeof(bitarray_base_t) * FILTER_SIZE);
+		memset(msg.filter, 0x00, sizeof(bitarray_base_t) * FILTER_SIZE);
 		index = 0;
 		for (j = 0; j < ctx->filter->group->filter_group[i]->size; j++) {
 			msg.filter[j - index * FILTER_SIZE] = ctx->filter->group->filter_group[i]->filter[j];
@@ -405,7 +405,7 @@ send_filters(peer_t *peer)
 					logstr(GLOG_ERROR, "Send filters: %s", err);
 				}
 				index++;
-				bzero(msg.filter, sizeof(bitarray_base_t) * FILTER_SIZE);
+				memset(msg.filter, 0x00, sizeof(bitarray_base_t) * FILTER_SIZE);
 			}
 		}
 		logstr(GLOG_DEBUG, "Sent buffer: %d", i);

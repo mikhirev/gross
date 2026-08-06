@@ -139,7 +139,7 @@ sha256(sha_byte_t *message, sha_ulong_t size)
 	}
 
 	/* Initialize buffer */
-	bzero(digestable_message, new_size);
+	memset(digestable_message, 0x00, new_size);
 	memcpy((void *)digestable_message, (const void *)message, size);
 	digestable_message[size] = 0x80;
 
